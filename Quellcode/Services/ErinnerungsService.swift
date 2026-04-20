@@ -18,7 +18,6 @@ class ErinnerungsService: ObservableObject {
         }
     }
 
-    /// Erstellt eine Erinnerung und gibt den Kalender-Identifier zurück.
     @discardableResult
     func erstelleRueckgabeErinnerung(
         schluesselName: String,
@@ -30,7 +29,15 @@ class ErinnerungsService: ObservableObject {
         let reminder = EKReminder(eventStore: store)
         reminder.title = "Schlüssel zurück: \(schluesselName)"
         reminder.notes = "Von \(putzfrauName) erwartet am \(faelligAm.anzeigeText)"
-        reminder.calendar = store.defaultCalendarForNewReminders()
+
+        // Gespeicherte Erinnerungsliste verwenden, sonst Standard
+        let gespeicherteId = UserDefaults.standard.string(forKey: "erinnerungsKalenderId") ?? ""
+        if !gespeicherteId.isEmpty,
+           let kalender = store.calendar(withIdentifier: gespeicherteId) {
+            reminder.calendar = kalender
+        } else {
+            reminder.calendar = store.defaultCalendarForNewReminders()
+        }
 
         var due = Calendar.current.dateComponents([.year, .month, .day], from: faelligAm)
         due.hour = 8
@@ -46,7 +53,6 @@ class ErinnerungsService: ObservableObject {
         }
     }
 
-    /// Markiert eine Erinnerung als erledigt.
     func markiereErledigt(identifier: String) {
         guard zugriffErteilt,
               let item = store.calendarItem(withIdentifier: identifier) as? EKReminder

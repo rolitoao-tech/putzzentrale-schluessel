@@ -81,12 +81,6 @@ class AppViewModel: ObservableObject {
         kunden.removeAll { $0.id == id }
     }
 
-    func standortAktualisieren(kundenId: Int64, typ: StandortTyp, detail: String) {
-        guard var k = kunde(id: kundenId) else { return }
-        k.standortTyp = typ; k.standortDetail = detail
-        kundeAktualisieren(k)
-    }
-
     // MARK: - Reinigungskräfte CRUD
 
     func rkHinzufuegen(_ r: Reinigungskraft) {

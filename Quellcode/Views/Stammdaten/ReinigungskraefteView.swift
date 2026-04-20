@@ -195,8 +195,13 @@ struct ReinigungskraftDetail: View {
                             if let k = vm.kunde(id: b.kundenId) {
                                 Text("Nr. \(k.kundennummer)").font(.caption2).foregroundColor(.secondary)
                             }
+                            // Zeige zugeteilte RK – macht deutlich, wessen Kunde das ist
+                            if let assignedRK = vm.zugeteilteReinigungskraft(kundenId: b.kundenId) {
+                                Text("Zugeteilt an: \(assignedRK.name)")
+                                    .font(.caption2).foregroundColor(.green.opacity(0.8))
+                            }
                         }
-                        .frame(minWidth: 150, alignment: .leading)
+                        .frame(minWidth: 180, alignment: .leading)
                         Text(b.grund.rawValue).font(.caption).foregroundColor(.secondary)
                             .frame(width: 100, alignment: .leading)
                         Spacer()
@@ -247,15 +252,16 @@ struct ReinigungskraftDetail: View {
                                 .frame(minWidth: 100, alignment: .leading)
                             Spacer()
                             if let b = vm.aktiveBewegung(kundenId: k.id) {
-                                Text(b.stellvertretungRKId != nil
-                                     ? "Bei \(vm.rkName(id: b.stellvertretungRKId!))"
-                                     : "Im Büro")
+                                let ort = b.stellvertretungRKId != nil
+                                    ? "Bei \(vm.rkName(id: b.stellvertretungRKId!))"
+                                    : b.aufenthaltsText
+                                Text(ort)
                                     .font(.caption).foregroundColor(.orange)
-                                    .frame(width: 120, alignment: .trailing)
+                                    .frame(width: 140, alignment: .trailing)
                             } else {
-                                Text(k.standortText)
+                                Text("Normalzustand")
                                     .font(.caption).foregroundColor(.secondary)
-                                    .frame(width: 120, alignment: .trailing)
+                                    .frame(width: 140, alignment: .trailing)
                             }
                         }
                         .padding(.horizontal, 12).padding(.vertical, 7)
@@ -322,7 +328,7 @@ struct ReinigungskraftFormular: View {
             }
             .padding()
         }
-        .frame(width: 360, height: 320)
+        .frame(minWidth: 320, minHeight: 280)
         .onAppear {
             if let r = vorlage {
                 name = r.name; aktiv = r.aktiv; notizen = r.notizen

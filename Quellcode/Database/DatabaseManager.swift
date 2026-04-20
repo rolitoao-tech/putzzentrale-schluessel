@@ -18,6 +18,14 @@ final class DatabaseManager {
     // MARK: - Datenbankpfad (iCloud Drive mit lokalem Fallback)
 
     private func dbPfad() -> URL {
+        if let pfadStr = UserDefaults.standard.string(forKey: "datenbankPfad"),
+           !pfadStr.isEmpty {
+            let url = URL(fileURLWithPath: pfadStr)
+            try? FileManager.default.createDirectory(
+                at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            return url
+        }
+
         let home = FileManager.default.homeDirectoryForCurrentUser
         let iCloud = home
             .appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs")
@@ -42,7 +50,7 @@ final class DatabaseManager {
             print("DB-Fehler: \(pfad.path)")
             return
         }
-        sqlite3_busy_timeout(db, 3000)   // 3 Sek. warten bei gleichzeitigem Schreibzugriff
+        sqlite3_busy_timeout(db, 3000)
         exec("PRAGMA foreign_keys = ON;")
         exec("PRAGMA journal_mode = WAL;")
     }
@@ -55,8 +63,6 @@ final class DatabaseManager {
             name                 TEXT NOT NULL,
             wohnort              TEXT DEFAULT '',
             zugeteilt_rk_id      INTEGER NOT NULL DEFAULT 0,
-            standort_typ         TEXT NOT NULL DEFAULT 'safe',
-            standort_detail      TEXT DEFAULT '',
             aktiv                INTEGER NOT NULL DEFAULT 1,
             notizen              TEXT DEFAULT ''
         );
@@ -73,24 +79,32 @@ final class DatabaseManager {
 
         exec("""
         CREATE TABLE IF NOT EXISTS bewegungen (
-            id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-            kunden_id            INTEGER NOT NULL,
-            datum_abgang         TEXT NOT NULL,
-            grund                TEXT NOT NULL,
+            id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+            kunden_id             INTEGER NOT NULL,
+            datum_abgang          TEXT NOT NULL,
+            grund                 TEXT NOT NULL,
             stellvertretung_rk_id INTEGER,
-            erwartete_rueckgabe  TEXT,
-            datum_rueckgabe      TEXT,
-            pool_eingetragen     INTEGER NOT NULL DEFAULT 0,
-            notizen              TEXT DEFAULT '',
+            buero_ablage          TEXT,
+            buero_ablage_detail   TEXT DEFAULT '',
+            erwartete_rueckgabe   TEXT,
+            datum_rueckgabe       TEXT,
+            pool_eingetragen      INTEGER NOT NULL DEFAULT 0,
+            notizen               TEXT DEFAULT '',
+            erstellt_von          TEXT DEFAULT '',
+            erstellt_am           TEXT,
             FOREIGN KEY (kunden_id) REFERENCES kunden(id)
         );
         """)
     }
 
-    // Migration: neue Spalten hinzufügen (schlägt still fehl wenn bereits vorhanden)
     private func migrateIfNeeded() {
+        // Spalten aus früheren Versionen (schlägt still fehl wenn bereits vorhanden)
         exec("ALTER TABLE kunden ADD COLUMN zugeteilt_rk_id INTEGER NOT NULL DEFAULT 0;")
         exec("ALTER TABLE bewegungen ADD COLUMN stellvertretung_rk_id INTEGER;")
+        exec("ALTER TABLE bewegungen ADD COLUMN buero_ablage TEXT;")
+        exec("ALTER TABLE bewegungen ADD COLUMN buero_ablage_detail TEXT DEFAULT '';")
+        exec("ALTER TABLE bewegungen ADD COLUMN erstellt_von TEXT DEFAULT '';")
+        exec("ALTER TABLE bewegungen ADD COLUMN erstellt_am TEXT;")
     }
 
     // MARK: - Helpers
@@ -129,13 +143,12 @@ final class DatabaseManager {
     }
 
     // MARK: - Kunden
-    // Spalten: 0=id, 1=kundennummer, 2=name, 3=wohnort, 4=zugeteilt_rk_id,
-    //          5=standort_typ, 6=standort_detail, 7=aktiv, 8=notizen
+    // Spalten: 0=id, 1=kundennummer, 2=name, 3=wohnort, 4=zugeteilt_rk_id, 5=aktiv, 6=notizen
 
     func fetchKunden(nurAktive: Bool = false) -> [Kunde] {
         let where_ = nurAktive ? " WHERE aktiv = 1" : ""
         guard let s = prepare(
-            "SELECT id,kundennummer,name,wohnort,zugeteilt_rk_id,standort_typ,standort_detail,aktiv,notizen FROM kunden\(where_) ORDER BY name"
+            "SELECT id,kundennummer,name,wohnort,zugeteilt_rk_id,aktiv,notizen FROM kunden\(where_) ORDER BY name"
         ) else { return [] }
         defer { sqlite3_finalize(s) }
         var list: [Kunde] = []
@@ -146,10 +159,8 @@ final class DatabaseManager {
                 name:                        col(s, 2),
                 wohnort:                     col(s, 3),
                 zugeteilteReinigungskraftId: sqlite3_column_int64(s, 4),
-                standortTyp:                 StandortTyp(rawValue: col(s, 5)) ?? .safe,
-                standortDetail:              col(s, 6),
-                aktiv:                       sqlite3_column_int(s, 7) != 0,
-                notizen:                     col(s, 8)
+                aktiv:                       sqlite3_column_int(s, 5) != 0,
+                notizen:                     col(s, 6)
             ))
         }
         return list
@@ -158,27 +169,25 @@ final class DatabaseManager {
     @discardableResult
     func insertKunde(_ k: Kunde) -> Int64 {
         guard let s = prepare(
-            "INSERT INTO kunden (kundennummer,name,wohnort,zugeteilt_rk_id,standort_typ,standort_detail,aktiv,notizen) VALUES (?,?,?,?,?,?,?,?)"
+            "INSERT INTO kunden (kundennummer,name,wohnort,zugeteilt_rk_id,aktiv,notizen) VALUES (?,?,?,?,?,?)"
         ) else { return -1 }
         defer { sqlite3_finalize(s) }
         bind(s,1,k.kundennummer); bind(s,2,k.name); bind(s,3,k.wohnort)
         sqlite3_bind_int64(s,4,k.zugeteilteReinigungskraftId)
-        bind(s,5,k.standortTyp.rawValue); bind(s,6,k.standortDetail)
-        sqlite3_bind_int(s,7,k.aktiv ? 1 : 0); bind(s,8,k.notizen)
+        sqlite3_bind_int(s,5,k.aktiv ? 1 : 0); bind(s,6,k.notizen)
         sqlite3_step(s)
         return sqlite3_last_insert_rowid(db)
     }
 
     func updateKunde(_ k: Kunde) {
         guard let s = prepare(
-            "UPDATE kunden SET kundennummer=?,name=?,wohnort=?,zugeteilt_rk_id=?,standort_typ=?,standort_detail=?,aktiv=?,notizen=? WHERE id=?"
+            "UPDATE kunden SET kundennummer=?,name=?,wohnort=?,zugeteilt_rk_id=?,aktiv=?,notizen=? WHERE id=?"
         ) else { return }
         defer { sqlite3_finalize(s) }
         bind(s,1,k.kundennummer); bind(s,2,k.name); bind(s,3,k.wohnort)
         sqlite3_bind_int64(s,4,k.zugeteilteReinigungskraftId)
-        bind(s,5,k.standortTyp.rawValue); bind(s,6,k.standortDetail)
-        sqlite3_bind_int(s,7,k.aktiv ? 1 : 0); bind(s,8,k.notizen)
-        sqlite3_bind_int64(s,9,k.id)
+        sqlite3_bind_int(s,5,k.aktiv ? 1 : 0); bind(s,6,k.notizen)
+        sqlite3_bind_int64(s,7,k.id)
         sqlite3_step(s)
     }
 
@@ -229,12 +238,18 @@ final class DatabaseManager {
 
     // MARK: - Bewegungen
     // Spalten: 0=id, 1=kunden_id, 2=datum_abgang, 3=grund,
-    //          4=stellvertretung_rk_id, 5=erwartete_rueckgabe,
-    //          6=datum_rueckgabe, 7=pool_eingetragen, 8=notizen
+    //          4=stellvertretung_rk_id, 5=buero_ablage, 6=buero_ablage_detail
+    //          7=erwartete_rueckgabe, 8=datum_rueckgabe, 9=pool_eingetragen, 10=notizen
 
+    // Spalten: 0=id,1=kunden_id,2=datum_abgang,3=grund,4=stellvertretung_rk_id,
+    //          5=buero_ablage,6=buero_ablage_detail,7=erwartete_rueckgabe,
+    //          8=datum_rueckgabe,9=pool_eingetragen,10=notizen,
+    //          11=erstellt_von,12=erstellt_am
     private let bSelect = """
         SELECT id,kunden_id,datum_abgang,grund,
-               stellvertretung_rk_id,erwartete_rueckgabe,datum_rueckgabe,pool_eingetragen,notizen
+               stellvertretung_rk_id,buero_ablage,buero_ablage_detail,
+               erwartete_rueckgabe,datum_rueckgabe,pool_eingetragen,notizen,
+               erstellt_von,erstellt_am
         FROM bewegungen
         """
 
@@ -242,16 +257,21 @@ final class DatabaseManager {
         let stvId = sqlite3_column_type(s, 4) != SQLITE_NULL
             ? sqlite3_column_int64(s, 4) as Int64?
             : nil
+        let ablage = BueroAblage(rawValue: col(s, 5))
         return Bewegung(
-            id:                   sqlite3_column_int64(s, 0),
-            kundenId:             sqlite3_column_int64(s, 1),
-            datumAbgang:          colDateReq(s, 2),
-            grund:                BewegungGrund(rawValue: col(s, 3)) ?? .einzelTermin,
-            stellvertretungRKId:  stvId,
-            erwarteteRueckgabe:   colDate(s, 5),
-            datumRueckgabe:       colDate(s, 6),
-            poolEingetragen:      sqlite3_column_int(s, 7) != 0,
-            notizen:              col(s, 8)
+            id:                  sqlite3_column_int64(s, 0),
+            kundenId:            sqlite3_column_int64(s, 1),
+            datumAbgang:         colDateReq(s, 2),
+            grund:               BewegungGrund(rawValue: col(s, 3)) ?? .einzelTermin,
+            stellvertretungRKId: stvId,
+            bueroAblage:         ablage,
+            bueroAblageDetail:   col(s, 6),
+            erwarteteRueckgabe:  colDate(s, 7),
+            datumRueckgabe:      colDate(s, 8),
+            poolEingetragen:     sqlite3_column_int(s, 9) != 0,
+            notizen:             col(s, 10),
+            erstelltVon:         col(s, 11),
+            erstelltAm:          colDate(s, 12)
         )
     }
 
@@ -296,8 +316,9 @@ final class DatabaseManager {
     func insertBewegung(_ b: Bewegung) -> Int64 {
         guard let s = prepare("""
             INSERT INTO bewegungen
-            (kunden_id,datum_abgang,grund,stellvertretung_rk_id,erwartete_rueckgabe,datum_rueckgabe,pool_eingetragen,notizen)
-            VALUES (?,?,?,?,?,?,?,?)
+            (kunden_id,datum_abgang,grund,stellvertretung_rk_id,buero_ablage,buero_ablage_detail,
+             erwartete_rueckgabe,datum_rueckgabe,pool_eingetragen,notizen,erstellt_von,erstellt_am)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
             """) else { return -1 }
         defer { sqlite3_finalize(s) }
         sqlite3_bind_int64(s,1,b.kundenId)
@@ -305,9 +326,14 @@ final class DatabaseManager {
         bind(s,3,b.grund.rawValue)
         if let stvId = b.stellvertretungRKId { sqlite3_bind_int64(s,4,stvId) }
         else { sqlite3_bind_null(s,4) }
-        bindDate(s,5,b.erwarteteRueckgabe); bindDate(s,6,b.datumRueckgabe)
-        sqlite3_bind_int(s,7,b.poolEingetragen ? 1 : 0)
-        bind(s,8,b.notizen)
+        if let ablage = b.bueroAblage { bind(s,5,ablage.rawValue) }
+        else { sqlite3_bind_null(s,5) }
+        bind(s,6,b.bueroAblageDetail)
+        bindDate(s,7,b.erwarteteRueckgabe); bindDate(s,8,b.datumRueckgabe)
+        sqlite3_bind_int(s,9,b.poolEingetragen ? 1 : 0)
+        bind(s,10,b.notizen)
+        bind(s,11,NSUserName())
+        bind(s,12,DateFormatter.iso8601Date.string(from: Date()))
         sqlite3_step(s)
         return sqlite3_last_insert_rowid(db)
     }
@@ -315,7 +341,8 @@ final class DatabaseManager {
     func updateBewegung(_ b: Bewegung) {
         guard let s = prepare("""
             UPDATE bewegungen SET kunden_id=?,datum_abgang=?,grund=?,
-            stellvertretung_rk_id=?,erwartete_rueckgabe=?,datum_rueckgabe=?,pool_eingetragen=?,notizen=? WHERE id=?
+            stellvertretung_rk_id=?,buero_ablage=?,buero_ablage_detail=?,
+            erwartete_rueckgabe=?,datum_rueckgabe=?,pool_eingetragen=?,notizen=? WHERE id=?
             """) else { return }
         defer { sqlite3_finalize(s) }
         sqlite3_bind_int64(s,1,b.kundenId)
@@ -323,9 +350,12 @@ final class DatabaseManager {
         bind(s,3,b.grund.rawValue)
         if let stvId = b.stellvertretungRKId { sqlite3_bind_int64(s,4,stvId) }
         else { sqlite3_bind_null(s,4) }
-        bindDate(s,5,b.erwarteteRueckgabe); bindDate(s,6,b.datumRueckgabe)
-        sqlite3_bind_int(s,7,b.poolEingetragen ? 1 : 0)
-        bind(s,8,b.notizen); sqlite3_bind_int64(s,9,b.id)
+        if let ablage = b.bueroAblage { bind(s,5,ablage.rawValue) }
+        else { sqlite3_bind_null(s,5) }
+        bind(s,6,b.bueroAblageDetail)
+        bindDate(s,7,b.erwarteteRueckgabe); bindDate(s,8,b.datumRueckgabe)
+        sqlite3_bind_int(s,9,b.poolEingetragen ? 1 : 0)
+        bind(s,10,b.notizen); sqlite3_bind_int64(s,11,b.id)
         sqlite3_step(s)
     }
 

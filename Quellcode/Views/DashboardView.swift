@@ -62,13 +62,12 @@ struct DashboardView: View {
                 VStack(spacing: 1) {
                     // Kopfzeile
                     HStack {
-                        Text("Kunde").frame(minWidth: 150, alignment: .leading)
-                        Text("Aktuell bei").frame(minWidth: 130, alignment: .leading)
+                        Text("Kunde / Zuget. RK").frame(minWidth: 160, alignment: .leading)
+                        Text("Aktuell bei").frame(minWidth: 140, alignment: .leading)
                         Text("Grund").frame(minWidth: 100, alignment: .leading)
                         Text("Eingefordert").frame(width: 90, alignment: .leading)
                         Spacer()
                         Text("Erwartet zurück").frame(width: 110, alignment: .trailing)
-                        Text("Pool").frame(width: 36, alignment: .center)
                         Spacer().frame(width: 90)
                     }
                     .font(.caption).foregroundColor(.secondary)
@@ -114,10 +113,8 @@ struct DashboardZeile: View {
     @State private var zeigeRueckgabe = false
 
     private var aktuellerAufenthaltsort: String {
-        if let rkId = bewegung.stellvertretungRKId {
-            return vm.rkName(id: rkId)
-        }
-        return "Im Büro"
+        if let rkId = bewegung.stellvertretungRKId { return vm.rkName(id: rkId) }
+        return bewegung.aufenthaltsText
     }
 
     var body: some View {
@@ -125,20 +122,23 @@ struct DashboardZeile: View {
             Image(systemName: bewegung.status.icon)
                 .foregroundColor(bewegung.status.farbe).frame(width: 18)
 
-            // Kunde (Kundennummer + Name)
+            // Kunde: Name + Nr. + zugeteilte RK
             VStack(alignment: .leading, spacing: 1) {
                 Text(vm.kundeName(id: bewegung.kundenId)).fontWeight(.medium)
                 if let k = vm.kunde(id: bewegung.kundenId) {
                     Text("Nr. \(k.kundennummer)").font(.caption2).foregroundColor(.secondary)
                 }
+                if let rk = vm.zugeteilteReinigungskraft(kundenId: bewegung.kundenId) {
+                    Text("RK: \(rk.name)").font(.caption2).foregroundColor(.green.opacity(0.8))
+                }
             }
-            .frame(minWidth: 150, alignment: .leading)
+            .frame(minWidth: 160, alignment: .leading)
 
             // Aktueller Aufenthaltsort
             Text(aktuellerAufenthaltsort)
                 .font(.caption)
                 .foregroundColor(bewegung.stellvertretungRKId != nil ? .orange : .secondary)
-                .frame(minWidth: 130, alignment: .leading)
+                .frame(minWidth: 140, alignment: .leading)
 
             Text(bewegung.grund.rawValue)
                 .font(.caption).foregroundColor(.secondary)
@@ -160,12 +160,6 @@ struct DashboardZeile: View {
                 Text("–").font(.caption).foregroundColor(.secondary)
                     .frame(width: 110, alignment: .trailing)
             }
-
-            // Pool-Badge
-            Image(systemName: bewegung.poolEingetragen ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(bewegung.poolEingetragen ? .green : .secondary)
-                .font(.caption)
-                .frame(width: 36, alignment: .center)
 
             // Schnell-Rückgabe
             Button("Zurück") { zeigeRueckgabe = true }

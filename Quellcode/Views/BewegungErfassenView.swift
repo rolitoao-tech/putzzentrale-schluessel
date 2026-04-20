@@ -2,7 +2,22 @@ import SwiftUI
 
 enum BewegungsModus {
     case einfordern(vorausgewaehlt: Kunde? = nil)
+    case bearbeiten(Bewegung)
     case rueckgabe(Bewegung)
+}
+
+private enum AblageWahl: String, CaseIterable {
+    case safe            = "Safe"
+    case dossier         = "Dossier"
+    case stellvertretung = "Stellvertretung"
+
+    var icon: String {
+        switch self {
+        case .safe:            return "lock.fill"
+        case .dossier:         return "folder.fill"
+        case .stellvertretung: return "person.2.fill"
+        }
+    }
 }
 
 struct BewegungErfassenView: View {
@@ -11,37 +26,40 @@ struct BewegungErfassenView: View {
 
     let modus: BewegungsModus
 
-    // MARK: - Formular-Zustand (Einfordern)
-
     @State private var gewaehlterKunde: Kunde?
     @State private var datumAbgang = Date()
     @State private var grund = BewegungGrund.einzelTermin
+    @State private var ablageWahl: AblageWahl = .safe
+    @State private var hakenNr = ""
+    @State private var dossierKuerzel = ""
+    @State private var gewaehlteStellvertretung: Reinigungskraft?
     @State private var setzeRueckgabedatum = true
     @State private var erwarteteRueckgabe = Date().addingTimeInterval(7 * 86400)
-    @State private var mitStellvertretung = false
-    @State private var gewaehlteStellvertretung: Reinigungskraft?
+    @State private var bereitsZurueck = false
+    @State private var datumRueckgabe = Date()
     @State private var poolEingetragen = false
     @State private var notizen = ""
-
-    // MARK: - Formular-Zustand (Rückgabe)
-
-    @State private var datumRueckgabe = Date()
 
     var body: some View {
         switch modus {
         case .einfordern(let vorausgewaehlt):
-            einfordernFormular(vorausgewaehlt: vorausgewaehlt)
+            einfordernFormular(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: nil)
+        case .bearbeiten(let b):
+            einfordernFormular(vorausgewaehlt: nil, bestehendesBewegung: b)
         case .rueckgabe(let b):
             rueckgabeFormular(bewegung: b)
         }
     }
 
-    // MARK: - Einfordern-Formular
+    // MARK: - Einfordern / Bearbeiten
 
-    private func einfordernFormular(vorausgewaehlt: Kunde?) -> some View {
-        VStack(spacing: 0) {
+    private func einfordernFormular(vorausgewaehlt: Kunde?, bestehendesBewegung: Bewegung?) -> some View {
+        let istBearbeiten = bestehendesBewegung != nil
+        let titel = istBearbeiten ? "Bewegung bearbeiten" : "Schlüssel einfordern"
+
+        return VStack(spacing: 0) {
             HStack {
-                Text("Schlüssel einfordern").font(.title3).fontWeight(.semibold)
+                Text(titel).font(.title3).fontWeight(.semibold)
                 Spacer()
                 Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
             }
@@ -52,7 +70,11 @@ struct BewegungErfassenView: View {
 
             Form {
                 Section("Kunde") {
-                    if let k = vorausgewaehlt {
+                    if let b = bestehendesBewegung {
+                        LabeledContent("Kunde") {
+                            Text(vm.kundeName(id: b.kundenId)).foregroundColor(.secondary)
+                        }
+                    } else if let k = vorausgewaehlt {
                         LabeledContent("Kunde") {
                             Text("\(k.name) (Nr. \(k.kundennummer))").foregroundColor(.secondary)
                         }
@@ -78,7 +100,7 @@ struct BewegungErfassenView: View {
                             Text(g.rawValue).tag(g)
                         }
                     }
-                    Toggle("Rückgabedatum setzen", isOn: $setzeRueckgabedatum)
+                    Toggle("Erwartetes Rückgabedatum", isOn: $setzeRueckgabedatum)
                     if setzeRueckgabedatum {
                         DatePicker(
                             "Erwartet zurück",
@@ -89,9 +111,20 @@ struct BewegungErfassenView: View {
                     }
                 }
 
-                Section("Stellvertretung") {
-                    Toggle("Direkt an Stellvertretung", isOn: $mitStellvertretung)
-                    if mitStellvertretung {
+                Section("Ablage") {
+                    Picker("Ablageort", selection: $ablageWahl) {
+                        ForEach(AblageWahl.allCases, id: \.self) { w in
+                            Label(w.rawValue, systemImage: w.icon).tag(w)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    switch ablageWahl {
+                    case .safe:
+                        TextField("Haken-Nr. (1–48)", text: $hakenNr)
+                    case .dossier:
+                        TextField("Kürzel / Bezeichnung", text: $dossierKuerzel)
+                    case .stellvertretung:
                         Picker("Reinigungskraft", selection: $gewaehlteStellvertretung) {
                             Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
                             ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
@@ -101,8 +134,31 @@ struct BewegungErfassenView: View {
                     }
                 }
 
-                Section("CRM") {
-                    Toggle("Im Pool (CRM) eingetragen", isOn: $poolEingetragen)
+                // Historische Erfassung: Rückgabe bereits erfolgt
+                Section("Rückgabe") {
+                    Toggle("Schlüssel bereits zurückgegeben", isOn: $bereitsZurueck)
+                    if bereitsZurueck {
+                        DatePicker(
+                            "Datum Rückgabe",
+                            selection: $datumRueckgabe,
+                            in: datumAbgang...,
+                            displayedComponents: .date
+                        )
+                    }
+                }
+
+                Section {
+                    Toggle(isOn: $poolEingetragen) {
+                        HStack(spacing: 6) {
+                            Text("Im Pool (CRM) eingetragen")
+                            if !poolEingetragen {
+                                Text("(Pflichtfeld)")
+                                    .font(.caption).foregroundColor(.red)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("CRM")
                 }
 
                 Section("Notizen (optional)") {
@@ -114,20 +170,26 @@ struct BewegungErfassenView: View {
             Divider()
 
             HStack {
+                if let b = bestehendesBewegung {
+                    Button("Bewegung löschen") {
+                        vm.bewegungLoeschen(id: b.id)
+                        dismiss()
+                    }
+                    .foregroundColor(.red)
+                    .buttonStyle(.bordered)
+                }
                 Spacer()
                 Button("Speichern") {
-                    einfordernSpeichern(vorausgewaehlt: vorausgewaehlt)
+                    speichern(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: bestehendesBewegung)
                 }
                 .keyboardShortcut(.return, modifiers: .command)
                 .buttonStyle(.borderedProminent)
-                .disabled(!einfordernGueltig(vorausgewaehlt: vorausgewaehlt))
+                .disabled(!formularGueltig(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: bestehendesBewegung))
             }
             .padding()
         }
-        .frame(width: 480, height: 560)
-        .onAppear {
-            if let k = vorausgewaehlt { gewaehlterKunde = k }
-        }
+        .frame(minWidth: 440, minHeight: 560)
+        .onAppear { vorbefuellen(vorausgewaehlt: vorausgewaehlt, bewegung: bestehendesBewegung) }
     }
 
     // MARK: - Rückgabe-Formular
@@ -149,13 +211,11 @@ struct BewegungErfassenView: View {
                     LabeledContent("Kunde") {
                         Text(vm.kundeName(id: bewegung.kundenId)).foregroundColor(.secondary)
                     }
-                    if let rkId = bewegung.stellvertretungRKId {
-                        LabeledContent("War bei") {
+                    LabeledContent("War bei") {
+                        if let rkId = bewegung.stellvertretungRKId {
                             Text(vm.rkName(id: rkId)).foregroundColor(.secondary)
-                        }
-                    } else {
-                        LabeledContent("War bei") {
-                            Text("Im Büro").foregroundColor(.secondary)
+                        } else {
+                            Text(bewegung.aufenthaltsText).foregroundColor(.secondary)
                         }
                     }
                     if let rk = vm.zugeteilteReinigungskraft(kundenId: bewegung.kundenId) {
@@ -192,7 +252,7 @@ struct BewegungErfassenView: View {
             }
             .padding()
         }
-        .frame(width: 400, height: 330)
+        .frame(minWidth: 360, minHeight: 300)
     }
 
     // MARK: - Hilfsmethoden
@@ -203,28 +263,82 @@ struct BewegungErfassenView: View {
         }
     }
 
-    private func einfordernGueltig(vorausgewaehlt: Kunde?) -> Bool {
-        let kundeOk = vorausgewaehlt != nil || gewaehlterKunde != nil
-        let stellvertretungOk = !mitStellvertretung || gewaehlteStellvertretung != nil
-        return kundeOk && stellvertretungOk
+    private func formularGueltig(vorausgewaehlt: Kunde?, bestehendesBewegung: Bewegung?) -> Bool {
+        let kundeOk = bestehendesBewegung != nil || vorausgewaehlt != nil || gewaehlterKunde != nil
+        let ablageOk = ablageWahl != .stellvertretung || gewaehlteStellvertretung != nil
+        return kundeOk && ablageOk && poolEingetragen
     }
 
-    private func einfordernSpeichern(vorausgewaehlt: Kunde?) {
-        let kid = (vorausgewaehlt ?? gewaehlterKunde)!.id
+    private func vorbefuellen(vorausgewaehlt: Kunde?, bewegung: Bewegung?) {
+        if let k = vorausgewaehlt { gewaehlterKunde = k }
+        guard let b = bewegung else { return }
+        datumAbgang = b.datumAbgang
+        grund = b.grund
+        if let rkId = b.stellvertretungRKId {
+            ablageWahl = .stellvertretung
+            gewaehlteStellvertretung = vm.reinigungskraft(id: rkId)
+        } else if let ablage = b.bueroAblage {
+            ablageWahl = ablage == .safe ? .safe : .dossier
+            hakenNr = ablage == .safe ? b.bueroAblageDetail : ""
+            dossierKuerzel = ablage == .dossier ? b.bueroAblageDetail : ""
+        }
+        if let er = b.erwarteteRueckgabe {
+            setzeRueckgabedatum = true
+            erwarteteRueckgabe = er
+        } else {
+            setzeRueckgabedatum = false
+        }
+        if let dr = b.datumRueckgabe {
+            bereitsZurueck = true
+            datumRueckgabe = dr
+        }
+        poolEingetragen = b.poolEingetragen
+        notizen = b.notizen
+    }
 
-        let bewegung = Bewegung(
-            kundenId:             kid,
-            datumAbgang:          datumAbgang,
-            grund:                grund,
-            stellvertretungRKId:  mitStellvertretung ? gewaehlteStellvertretung?.id : nil,
-            erwarteteRueckgabe:   setzeRueckgabedatum ? erwarteteRueckgabe : nil,
-            poolEingetragen:      poolEingetragen,
-            notizen:              notizen
-        )
+    private func speichern(vorausgewaehlt: Kunde?, bestehendesBewegung: Bewegung?) {
+        let kundenId: Int64
+        if let b = bestehendesBewegung {
+            kundenId = b.kundenId
+        } else {
+            kundenId = (vorausgewaehlt ?? gewaehlterKunde)!.id
+        }
 
-        Task {
-            await vm.abgangErfassen(bewegung)
-            await MainActor.run { dismiss() }
+        let stv: Int64?
+        let ablage: BueroAblage?
+        let ablageDetail: String
+        switch ablageWahl {
+        case .stellvertretung:
+            stv = gewaehlteStellvertretung?.id
+            ablage = nil; ablageDetail = ""
+        case .safe:
+            stv = nil; ablage = .safe
+            ablageDetail = hakenNr.trimmingCharacters(in: .whitespaces)
+        case .dossier:
+            stv = nil; ablage = .dossier
+            ablageDetail = dossierKuerzel.trimmingCharacters(in: .whitespaces)
+        }
+
+        var b = bestehendesBewegung ?? Bewegung()
+        b.kundenId            = kundenId
+        b.datumAbgang         = datumAbgang
+        b.grund               = grund
+        b.stellvertretungRKId = stv
+        b.bueroAblage         = ablage
+        b.bueroAblageDetail   = ablageDetail
+        b.erwarteteRueckgabe  = setzeRueckgabedatum ? erwarteteRueckgabe : nil
+        b.datumRueckgabe      = bereitsZurueck ? datumRueckgabe : nil
+        b.poolEingetragen     = poolEingetragen
+        b.notizen             = notizen
+
+        if bestehendesBewegung != nil {
+            vm.bewegungAktualisieren(b)
+            dismiss()
+        } else {
+            Task {
+                await vm.abgangErfassen(b)
+                await MainActor.run { dismiss() }
+            }
         }
     }
 }

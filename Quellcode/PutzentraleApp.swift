@@ -10,8 +10,11 @@ struct PutzentraleApp: App {
         .windowToolbarStyle(.unified(showsTitle: true))
         .defaultSize(width: 1280, height: 780)
         .commands {
-            // Standard-Menü-Einträge entfernen, die nicht benötigt werden
             CommandGroup(replacing: .newItem) { }
+        }
+
+        Settings {
+            EinstellungenView()
         }
     }
 }

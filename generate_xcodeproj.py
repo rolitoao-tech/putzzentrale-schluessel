@@ -26,6 +26,7 @@ SOURCE_FILES = [
     ("DashboardView",            "Views/DashboardView.swift"),
     ("SchluesselUebersichtView", "Views/SchluesselUebersichtView.swift"),
     ("BewegungErfassenView",     "Views/BewegungErfassenView.swift"),
+    ("EinstellungenView",        "Views/EinstellungenView.swift"),
     ("ReinigungskraefteView",    "Views/Stammdaten/ReinigungskraefteView.swift"),
     ("ErinnerungsService",       "Services/ErinnerungsService.swift"),
 ]
@@ -146,7 +147,7 @@ def pbxproj():
     group(P["viewmodels_grp"], "ViewModels", "ViewModels",
           [f'{F["AppViewModel"][0]} /* AppViewModel.swift */,'])
 
-    view_names = ["DashboardView","SchluesselUebersichtView","BewegungErfassenView"]
+    view_names = ["DashboardView","SchluesselUebersichtView","BewegungErfassenView","EinstellungenView"]
     group(P["views_grp"], "Views", "Views",
           [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in view_names] +
           [f'{P["stammdaten_grp"]} /* Stammdaten */,'])
