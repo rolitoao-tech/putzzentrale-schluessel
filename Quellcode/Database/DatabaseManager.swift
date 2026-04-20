@@ -42,6 +42,7 @@ final class DatabaseManager {
             print("DB-Fehler: \(pfad.path)")
             return
         }
+        sqlite3_busy_timeout(db, 3000)   // 3 Sek. warten bei gleichzeitigem Schreibzugriff
         exec("PRAGMA foreign_keys = ON;")
         exec("PRAGMA journal_mode = WAL;")
     }

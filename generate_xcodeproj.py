@@ -37,6 +37,7 @@ P   = {n: new_id() for n in [
     "views_grp", "stammdaten_grp", "services_grp",
     "app_ref", "infoplist_ref", "entitlements_ref",
     "eventkit_ref", "eventkit_build",
+    "assets_ref", "assets_build",
     "sources_phase", "frameworks_phase", "resources_phase",
     "proj_debug", "proj_release", "tgt_debug", "tgt_release",
     "proj_cfglist", "tgt_cfglist",
@@ -61,6 +62,7 @@ def pbxproj():
     # --- PBXBuildFile ---
     L.append("/* Begin PBXBuildFile section */")
     w(P["eventkit_build"], "/* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef =", P["eventkit_ref"], "/* EventKit.framework */; };")
+    w(P["assets_build"], "/* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef =", P["assets_ref"], "/* Assets.xcassets */; };")
     for name, path in SOURCE_FILES:
         fname = os.path.basename(path)
         fref, fbuild = F[name]
@@ -72,6 +74,7 @@ def pbxproj():
     L.append("/* Begin PBXFileReference section */")
     w(P["app_ref"], f'/* {APP_NAME}.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "{APP_NAME}.app"; sourceTree = BUILT_PRODUCTS_DIR; }};')
     w(P["eventkit_ref"], "/* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };")
+    w(P["assets_ref"], '/* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };')
     w(P["infoplist_ref"], '/* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };')
     w(P["entitlements_ref"], f'/* {APP_NAME}.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "{APP_NAME}.entitlements"; sourceTree = "<group>"; }};')
     for name, path in SOURCE_FILES:
@@ -126,6 +129,7 @@ def pbxproj():
               f'{P["viewmodels_grp"]} /* ViewModels */,',
               f'{P["views_grp"]} /* Views */,',
               f'{P["services_grp"]} /* Services */,',
+              f'{P["assets_ref"]} /* Assets.xcassets */,',
               f'{P["infoplist_ref"]} /* Info.plist */,',
               f'{P["entitlements_ref"]} /* {APP_NAME}.entitlements */,',
           ])
@@ -190,7 +194,7 @@ def pbxproj():
 
     # --- PBXResourcesBuildPhase ---
     L.append("/* Begin PBXResourcesBuildPhase section */")
-    L.append(f'\t\t{P["resources_phase"]} /* Resources */ = {{ isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; }};')
+    L.append(f'\t\t{P["resources_phase"]} /* Resources */ = {{ isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ({P["assets_build"]} /* Assets.xcassets in Resources */,); runOnlyForDeploymentPostprocessing = 0; }};')
     L.append("/* End PBXResourcesBuildPhase section */")
     L.append("")
 
@@ -235,6 +239,7 @@ def pbxproj():
         "PRODUCT_BUNDLE_IDENTIFIER": f'"{BUNDLE_ID}"',
         "PRODUCT_NAME":             f'"{APP_NAME}"',
         "SWIFT_EMIT_LOC_STRINGS":   "YES",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": '"AppIcon"',
     }
     cfg(P["tgt_debug"],   "Debug",   {**tgt_settings, "SWIFT_OPTIMIZATION_LEVEL": '"-Onone"', "DEBUG_INFORMATION_FORMAT": "dwarf"})
     cfg(P["tgt_release"], "Release", {**tgt_settings})
