@@ -1,0 +1,300 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F2DB5D46A3AE40A082125BB7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAEF970D8EB949FFA08CA297 /* EventKit.framework */; };
+		0F968332EC164F1499D1C4F0 /* PutzentraleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */; };
+		7FAC079516AE4C7789EDEA98 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E58B3F7AA08412C88DA98AE /* ContentView.swift */; };
+		3411E62C22A545B29A07940B /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173DC7BABB448F284405505 /* DateFormatters.swift */; };
+		BDDFC3F8999644E5B6FDE8D7 /* Kunde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D7C6E8812494930BDA04544 /* Kunde.swift */; };
+		40650903CA534F6F8E8FA7D7 /* Putzfrau.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF72D309456242798F2E695C /* Putzfrau.swift */; };
+		0CC38FAC0BE84AF582585201 /* Schluessel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13C758BF1C224F08A55934F2 /* Schluessel.swift */; };
+		48BE0B5E38B343A193DD5F62 /* Bewegung.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */; };
+		E6ABDDB6EE5F4F5780BA9E33 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A757607C6714539BA6C3E45 /* DatabaseManager.swift */; };
+		080D7BF091E44EE1ABEB3376 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */; };
+		570E34916D0C4248B7DB6277 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */; };
+		0ED780CFC3404B6F9AE59331 /* SchluesselListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2058F9EB7F024507801C1550 /* SchluesselListView.swift */; };
+		364647BFB6B0480C8528C5F6 /* SchluesselDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */; };
+		50BEC8F764EC43FAA6F7A23B /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */; };
+		DE540D5650FE4AD3805F1191 /* KundenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6376C8DEFFC543459B85D407 /* KundenView.swift */; };
+		3C7ECBD24EC84E36B816D56C /* PutzfrauenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */; };
+		89969EF28E1C460F973FC57F /* SchluesselVerwaltungView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */; };
+		801D6BC8C22E41919F5B7A96 /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2107947555F947F5944C3610 /* Schlüsselverwaltung.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Schlüsselverwaltung.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAEF970D8EB949FFA08CA297 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		9B2E97407A9449B4909BB2F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86FF4BAE10104FC3894B995E /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
+		3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
+		2E58B3F7AA08412C88DA98AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2173DC7BABB448F284405505 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
+		8D7C6E8812494930BDA04544 /* Kunde.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kunde.swift; sourceTree = "<group>"; };
+		FF72D309456242798F2E695C /* Putzfrau.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Putzfrau.swift; sourceTree = "<group>"; };
+		13C758BF1C224F08A55934F2 /* Schluessel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schluessel.swift; sourceTree = "<group>"; };
+		A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bewegung.swift; sourceTree = "<group>"; };
+		8A757607C6714539BA6C3E45 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		2058F9EB7F024507801C1550 /* SchluesselListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselListView.swift; sourceTree = "<group>"; };
+		FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselDetailView.swift; sourceTree = "<group>"; };
+		65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
+		6376C8DEFFC543459B85D407 /* KundenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KundenView.swift; sourceTree = "<group>"; };
+		65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzfrauenView.swift; sourceTree = "<group>"; };
+		57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselVerwaltungView.swift; sourceTree = "<group>"; };
+		115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C74EAF9246CD4DC380902010 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;
+			files = (
+				F2DB5D46A3AE40A082125BB7 /* EventKit.framework in Frameworks */,
+			); runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07912FCB164A4920B211B2A6 /*  */ = {
+			isa = PBXGroup;
+			children = (
+				5319CAAD15704B6CA479B48E /* Quellcode */,
+				C401708DFBD74B7CB36A484E /* Frameworks */,
+				328BC0ECC5C141F7B54B00F0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		328BC0ECC5C141F7B54B00F0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2107947555F947F5944C3610 /* Schlüsselverwaltung.app */,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+		C401708DFBD74B7CB36A484E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AAEF970D8EB949FFA08CA297 /* EventKit.framework */,
+			);
+			name = "Frameworks";
+			sourceTree = "<group>";
+		};
+		5319CAAD15704B6CA479B48E /* Quellcode */ = {
+			isa = PBXGroup;
+			children = (
+				3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */,
+				2E58B3F7AA08412C88DA98AE /* ContentView.swift */,
+				54E49EC8C1CD43319997DBB8 /* Models */,
+				ECB0F8BCE7BB4D8DAC2B4BF5 /* Utilities */,
+				E132386183DD4D14812E45EA /* Database */,
+				014BF477BEE34088867B0ECB /* ViewModels */,
+				ADE43EFDDDB94605AA2F1FE0 /* Views */,
+				CE95048B1888430387E60020 /* Services */,
+				9B2E97407A9449B4909BB2F6 /* Info.plist */,
+				86FF4BAE10104FC3894B995E /* Schlüsselverwaltung.entitlements */,
+			);
+			name = "Quellcode";
+			path = "Quellcode";
+			sourceTree = "<group>";
+		};
+		54E49EC8C1CD43319997DBB8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				8D7C6E8812494930BDA04544 /* Kunde.swift */,
+				FF72D309456242798F2E695C /* Putzfrau.swift */,
+				13C758BF1C224F08A55934F2 /* Schluessel.swift */,
+				A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */,
+			);
+			name = "Models";
+			path = "Models";
+			sourceTree = "<group>";
+		};
+		ECB0F8BCE7BB4D8DAC2B4BF5 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				2173DC7BABB448F284405505 /* DateFormatters.swift */,
+			);
+			name = "Utilities";
+			path = "Utilities";
+			sourceTree = "<group>";
+		};
+		E132386183DD4D14812E45EA /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				8A757607C6714539BA6C3E45 /* DatabaseManager.swift */,
+			);
+			name = "Database";
+			path = "Database";
+			sourceTree = "<group>";
+		};
+		014BF477BEE34088867B0ECB /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */,
+			);
+			name = "ViewModels";
+			path = "ViewModels";
+			sourceTree = "<group>";
+		};
+		ADE43EFDDDB94605AA2F1FE0 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */,
+				2058F9EB7F024507801C1550 /* SchluesselListView.swift */,
+				FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */,
+				65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */,
+				0B53430E6AC44070B4239ACA /* Stammdaten */,
+			);
+			name = "Views";
+			path = "Views";
+			sourceTree = "<group>";
+		};
+		0B53430E6AC44070B4239ACA /* Stammdaten */ = {
+			isa = PBXGroup;
+			children = (
+				6376C8DEFFC543459B85D407 /* KundenView.swift */,
+				65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */,
+				57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */,
+			);
+			name = "Stammdaten";
+			path = "Stammdaten";
+			sourceTree = "<group>";
+		};
+		CE95048B1888430387E60020 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */,
+			);
+			name = "Services";
+			path = "Services";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E931C41B71DD4DBF86E6B8B5 /* Schlüsselverwaltung */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB5CC7C028A04F9F8D5CE0B5 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */;
+			buildPhases = (BBBFD3D234A34E8E8BA61C8D /* Sources */, C74EAF9246CD4DC380902010 /* Frameworks */, BD502D903EBE4107A7F5ED1F /* Resources */,);
+			buildRules = (); dependencies = ();
+			name = "Schlüsselverwaltung"; productName = "Schlüsselverwaltung";
+			productReference = 2107947555F947F5944C3610 /* Schlüsselverwaltung.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C7DA4BDB8C2F429FAE2313E3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; TargetAttributes = { E931C41B71DD4DBF86E6B8B5 = { CreatedOnToolsVersion = 16.0; }; }; };
+			buildConfigurationList = 3FEFA10E30A64AFEBE71BEE9 /* Build configuration list for PBXProject "Schlüsselverwaltung" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (de, Base,);
+			mainGroup = 07912FCB164A4920B211B2A6;
+			productRefGroup = 328BC0ECC5C141F7B54B00F0 /* Products */;
+			projectDirPath = ""; projectRoot = "";
+			targets = (E931C41B71DD4DBF86E6B8B5 /* Schlüsselverwaltung */,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD502D903EBE4107A7F5ED1F /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BBBFD3D234A34E8E8BA61C8D /* Sources */ = {
+			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
+			files = (
+				0F968332EC164F1499D1C4F0 /* PutzentraleApp.swift in Sources */,
+				7FAC079516AE4C7789EDEA98 /* ContentView.swift in Sources */,
+				3411E62C22A545B29A07940B /* DateFormatters.swift in Sources */,
+				BDDFC3F8999644E5B6FDE8D7 /* Kunde.swift in Sources */,
+				40650903CA534F6F8E8FA7D7 /* Putzfrau.swift in Sources */,
+				0CC38FAC0BE84AF582585201 /* Schluessel.swift in Sources */,
+				48BE0B5E38B343A193DD5F62 /* Bewegung.swift in Sources */,
+				E6ABDDB6EE5F4F5780BA9E33 /* DatabaseManager.swift in Sources */,
+				080D7BF091E44EE1ABEB3376 /* AppViewModel.swift in Sources */,
+				570E34916D0C4248B7DB6277 /* DashboardView.swift in Sources */,
+				0ED780CFC3404B6F9AE59331 /* SchluesselListView.swift in Sources */,
+				364647BFB6B0480C8528C5F6 /* SchluesselDetailView.swift in Sources */,
+				50BEC8F764EC43FAA6F7A23B /* BewegungErfassenView.swift in Sources */,
+				DE540D5650FE4AD3805F1191 /* KundenView.swift in Sources */,
+				3C7ECBD24EC84E36B816D56C /* PutzfrauenView.swift in Sources */,
+				89969EF28E1C460F973FC57F /* SchluesselVerwaltungView.swift in Sources */,
+				801D6BC8C22E41919F5B7A96 /* ErinnerungsService.swift in Sources */,
+			); runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1D2F10C14BC647899F5B4AA1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SWIFT_VERSION = 5.0;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+			};
+			name = Debug;
+		};
+		52F189704CBC4141A5531F91 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SWIFT_VERSION = 5.0;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+			};
+			name = Release;
+		};
+		5EF8BA62724848CAA6394542 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SWIFT_VERSION = 5.0;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_ENTITLEMENTS = "Quellcode/Schlüsselverwaltung.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Quellcode/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.putzzentrale.schluessel";
+				PRODUCT_NAME = "Schlüsselverwaltung";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+			};
+			name = Debug;
+		};
+		5098D5ACD9154730B1844470 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SWIFT_VERSION = 5.0;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_ENTITLEMENTS = "Quellcode/Schlüsselverwaltung.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "Quellcode/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.putzzentrale.schluessel";
+				PRODUCT_NAME = "Schlüsselverwaltung";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3FEFA10E30A64AFEBE71BEE9 /* Build configuration list for PBXProject "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (1D2F10C14BC647899F5B4AA1 /* Debug */, 52F189704CBC4141A5531F91 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		FB5CC7C028A04F9F8D5CE0B5 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (5EF8BA62724848CAA6394542 /* Debug */, 5098D5ACD9154730B1844470 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+
+	};
+	rootObject = C7DA4BDB8C2F429FAE2313E3 /* Project object */;
+}
