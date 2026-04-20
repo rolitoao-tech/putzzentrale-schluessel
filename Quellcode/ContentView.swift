@@ -1,22 +1,9 @@
 import SwiftUI
 
-// Navigationsbereiche der Seitenleiste
-enum Navigationsbereich: String, Hashable, CaseIterable {
-    case dashboard          = "Dashboard"
-    case schluessel         = "Schlüssel"
-    case kunden             = "Kunden"
-    case putzfrauen         = "Putzfrauen"
-    case schluesselStamm    = "Schlüssel-Stamm"
-
-    var symbol: String {
-        switch self {
-        case .dashboard:        return "gauge.badge.plus"
-        case .schluessel:       return "key.fill"
-        case .kunden:           return "building.2.fill"
-        case .putzfrauen:       return "person.2.fill"
-        case .schluesselStamm:  return "key.horizontal.fill"
-        }
-    }
+enum Navigationsbereich: String, Hashable {
+    case dashboard        = "Dashboard"
+    case schluessel       = "Schlüssel-Übersicht"
+    case reinigungskraefte = "Reinigungskräfte"
 }
 
 struct ContentView: View {
@@ -26,7 +13,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
             seitenleiste
-                .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+                .navigationSplitViewColumnWidth(min: 190, ideal: 210)
         } detail: {
             NavigationStack {
                 detailAnsicht
@@ -35,65 +22,46 @@ struct ContentView: View {
         .environmentObject(vm)
     }
 
-    // MARK: - Seitenleiste
-
     private var seitenleiste: some View {
         List(selection: $bereich) {
             NavigationLink(value: Navigationsbereich.dashboard) {
                 Label("Dashboard", systemImage: "gauge.badge.plus")
             }
             NavigationLink(value: Navigationsbereich.schluessel) {
-                Label("Schlüssel", systemImage: "key.fill")
+                Label("Schlüssel-Übersicht", systemImage: "key.fill")
             }
 
             Section("Stammdaten") {
-                NavigationLink(value: Navigationsbereich.kunden) {
-                    Label("Kunden", systemImage: "building.2.fill")
-                }
-                NavigationLink(value: Navigationsbereich.putzfrauen) {
-                    Label("Putzfrauen", systemImage: "person.2.fill")
-                }
-                NavigationLink(value: Navigationsbereich.schluesselStamm) {
-                    Label("Schlüssel-Stamm", systemImage: "key.horizontal.fill")
+                NavigationLink(value: Navigationsbereich.reinigungskraefte) {
+                    Label("Reinigungskräfte", systemImage: "person.2.fill")
                 }
             }
         }
         .listStyle(.sidebar)
         .navigationTitle("Putzzentrale")
-        // Anzahl offener Pendenzen als Badge
         .safeAreaInset(edge: .bottom) {
-            offenePendenzenBadge
-        }
-    }
-
-    private var offenePendenzenBadge: some View {
-        let ueberfaellig = vm.ueberfaelligeBewegungen.count
-        return Group {
-            if ueberfaellig > 0 {
-                HStack {
+            // Warnung in der Seitenleiste wenn Schlüssel überfällig
+            let n = vm.ueberfaelligeBewegungen.count
+            if n > 0 {
+                HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
-                    Text("\(ueberfaellig) überfällig")
-                        .font(.caption)
-                        .foregroundColor(.red)
+                    Text("\(n) überfällig")
+                        .font(.caption).foregroundColor(.red)
                     Spacer()
                 }
                 .padding(10)
-                .background(.background.opacity(0.9))
+                .background(.background.opacity(0.95))
             }
         }
     }
 
-    // MARK: - Detail-Ansicht
-
     @ViewBuilder
     private var detailAnsicht: some View {
         switch bereich ?? .dashboard {
-        case .dashboard:        DashboardView()
-        case .schluessel:       SchluesselListView()
-        case .kunden:           KundenView()
-        case .putzfrauen:       PutzfrauenView()
-        case .schluesselStamm:  SchluesselVerwaltungView()
+        case .dashboard:          DashboardView()
+        case .schluessel:         SchluesselUebersichtView()
+        case .reinigungskraefte:  ReinigungskraefteView()
         }
     }
 }

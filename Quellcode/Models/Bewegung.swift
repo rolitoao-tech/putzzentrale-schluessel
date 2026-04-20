@@ -5,7 +5,6 @@ enum BewegungGrund: String, CaseIterable, Codable {
     case ferien          = "Ferien"
     case krankheit       = "Krankheit"
     case einzelTermin    = "Einzel-Termin"
-    case sonstiges       = "Sonstiges"
 }
 
 enum BewegungStatus {
@@ -18,7 +17,6 @@ enum BewegungStatus {
         case .zurueck:      return "Zurück"
         }
     }
-
     var farbe: Color {
         switch self {
         case .offen:        return .blue
@@ -26,7 +24,6 @@ enum BewegungStatus {
         case .zurueck:      return .green
         }
     }
-
     var icon: String {
         switch self {
         case .offen:        return "clock"
@@ -38,12 +35,13 @@ enum BewegungStatus {
 
 struct Bewegung: Identifiable, Hashable {
     var id: Int64 = 0
-    var schluesselId: Int64 = 0
+    var kundenId: Int64 = 0
     var datumAbgang: Date = Date()
-    var putzfrauId: Int64 = 0
+    var reinigungskraftId: Int64 = 0
     var grund: BewegungGrund = .einzelTermin
     var erwarteteRueckgabe: Date? = nil
     var datumRueckgabe: Date? = nil
+    var poolEingetragen: Bool = false
     var notizen: String = ""
 
     var status: BewegungStatus {

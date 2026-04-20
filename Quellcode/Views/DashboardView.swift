@@ -9,24 +9,32 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 24) {
                 kennzahlenLeiste
                 if !vm.ueberfaelligeBewegungen.isEmpty {
-                    ueberfaelligSektion
+                    pendenzSektion(
+                        titel: "Überfällig",
+                        titelFarbe: .red,
+                        bewegungen: vm.ueberfaelligeBewegungen,
+                        hervorheben: true
+                    )
                 }
-                offeneSektion
+                pendenzSektion(
+                    titel: "Offen (\(vm.offeneBewegungen.filter { $0.status == .offen }.count))",
+                    titelFarbe: .primary,
+                    bewegungen: vm.offeneBewegungen.filter { $0.status == .offen },
+                    hervorheben: false
+                )
             }
             .padding(24)
         }
         .navigationTitle("Dashboard")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    zeigeNeueBewegung = true
-                } label: {
+                Button { zeigeNeueBewegung = true } label: {
                     Label("Abgang erfassen", systemImage: "plus")
                 }
             }
         }
         .sheet(isPresented: $zeigeNeueBewegung) {
-            BewegungErfassenView(modus: .abgang)
+            BewegungErfassenView(modus: .abgang())
         }
     }
 
@@ -34,66 +42,41 @@ struct DashboardView: View {
 
     private var kennzahlenLeiste: some View {
         HStack(spacing: 16) {
-            KennzahlKarte(
-                titel: "Schlüssel gesamt",
-                wert: "\(vm.schluessel.count)",
-                symbol: "key.fill",
-                farbe: .blue
-            )
-            KennzahlKarte(
-                titel: "Im Umlauf",
-                wert: "\(vm.schluesselImUmlauf)",
-                symbol: "arrow.left.arrow.right",
-                farbe: .orange
-            )
-            KennzahlKarte(
-                titel: "Offene Pendenzen",
-                wert: "\(vm.offeneBewegungen.count)",
-                symbol: "clock",
-                farbe: .purple
-            )
-            KennzahlKarte(
-                titel: "Überfällig",
-                wert: "\(vm.ueberfaelligeBewegungen.count)",
-                symbol: "exclamationmark.triangle.fill",
-                farbe: vm.ueberfaelligeBewegungen.isEmpty ? .secondary : .red
-            )
+            KennzahlKarte(titel: "Kunden gesamt",    wert: "\(vm.kunden.filter(\.aktiv).count)", symbol: "person.fill",                 farbe: .blue)
+            KennzahlKarte(titel: "Im Umlauf",        wert: "\(vm.schluesselImUmlauf)",            symbol: "arrow.left.arrow.right",       farbe: .orange)
+            KennzahlKarte(titel: "Offene Pendenzen", wert: "\(vm.offeneBewegungen.count)",         symbol: "clock",                        farbe: .purple)
+            KennzahlKarte(titel: "Überfällig",       wert: "\(vm.ueberfaelligeBewegungen.count)",  symbol: "exclamationmark.triangle.fill", farbe: vm.ueberfaelligeBewegungen.isEmpty ? .secondary : .red)
         }
     }
 
-    // MARK: - Überfällige Bewegungen
+    // MARK: - Pendenz-Sektion
 
-    private var ueberfaelligSektion: some View {
+    @ViewBuilder
+    private func pendenzSektion(titel: String, titelFarbe: Color, bewegungen: [Bewegung], hervorheben: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Überfällig")
-                .font(.headline)
-                .foregroundColor(.red)
-
-            VStack(spacing: 1) {
-                ForEach(vm.ueberfaelligeBewegungen) { b in
-                    BewegungsZeile(bewegung: b, hervorheben: true)
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-    }
-
-    // MARK: - Alle offenen Bewegungen
-
-    private var offeneSektion: some View {
-        let nurOffen = vm.offeneBewegungen.filter { $0.status == .offen }
-        return VStack(alignment: .leading, spacing: 8) {
-            Text("Offen (\(nurOffen.count))")
-                .font(.headline)
-
-            if nurOffen.isEmpty {
+            Text(titel).font(.headline).foregroundColor(titelFarbe)
+            if bewegungen.isEmpty {
                 Text("Keine offenen Pendenzen.")
-                    .foregroundColor(.secondary)
-                    .padding()
+                    .foregroundColor(.secondary).padding(.vertical, 4)
             } else {
                 VStack(spacing: 1) {
-                    ForEach(nurOffen) { b in
-                        BewegungsZeile(bewegung: b, hervorheben: false)
+                    // Kopfzeile
+                    HStack {
+                        Text("Kunde").frame(minWidth: 150, alignment: .leading)
+                        Text("Reinigungskraft").frame(minWidth: 130, alignment: .leading)
+                        Text("Grund").frame(minWidth: 100, alignment: .leading)
+                        Text("Abgang").frame(width: 85, alignment: .leading)
+                        Spacer()
+                        Text("Erwartet zurück").frame(width: 110, alignment: .trailing)
+                        Text("Pool").frame(width: 36, alignment: .center)
+                        Spacer().frame(width: 90)
+                    }
+                    .font(.caption).foregroundColor(.secondary)
+                    .padding(.horizontal, 12).padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.08))
+
+                    ForEach(bewegungen) { b in
+                        DashboardZeile(bewegung: b, hervorheben: hervorheben)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -105,23 +88,13 @@ struct DashboardView: View {
 // MARK: - Kennzahl-Karte
 
 struct KennzahlKarte: View {
-    let titel: String
-    let wert: String
-    let symbol: String
-    let farbe: Color
+    let titel: String; let wert: String; let symbol: String; let farbe: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: symbol)
-                    .foregroundColor(farbe)
-                Spacer()
-            }
-            Text(wert)
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-            Text(titel)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Image(systemName: symbol).foregroundColor(farbe)
+            Text(wert).font(.system(size: 32, weight: .bold, design: .rounded))
+            Text(titel).font(.caption).foregroundColor(.secondary)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -131,9 +104,9 @@ struct KennzahlKarte: View {
     }
 }
 
-// MARK: - Bewegungs-Zeile (Dashboard und SchlüsselDetail)
+// MARK: - Dashboard-Zeile
 
-struct BewegungsZeile: View {
+struct DashboardZeile: View {
     @EnvironmentObject var vm: AppViewModel
     let bewegung: Bewegung
     let hervorheben: Bool
@@ -141,63 +114,58 @@ struct BewegungsZeile: View {
     @State private var zeigeRueckgabe = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Status-Icon
+        HStack(spacing: 10) {
             Image(systemName: bewegung.status.icon)
-                .foregroundColor(bewegung.status.farbe)
-                .frame(width: 20)
+                .foregroundColor(bewegung.status.farbe).frame(width: 18)
 
-            // Schlüssel + Kunde
-            VStack(alignment: .leading, spacing: 2) {
-                Text(vm.schluesselName(id: bewegung.schluesselId))
-                    .fontWeight(.medium)
-                Text(vm.kundeName(id: kundeId))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            // Kunde (Kundennummer + Name)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(vm.kundeName(id: bewegung.kundenId)).fontWeight(.medium)
+                if let k = vm.kunde(id: bewegung.kundenId) {
+                    Text("Nr. \(k.kundennummer)").font(.caption2).foregroundColor(.secondary)
+                }
             }
-            .frame(minWidth: 160, alignment: .leading)
+            .frame(minWidth: 150, alignment: .leading)
 
-            // Putzfrau
-            Text(vm.putzfrauName(id: bewegung.putzfrauId))
-                .frame(minWidth: 120, alignment: .leading)
+            Text(vm.rkName(id: bewegung.reinigungskraftId))
+                .frame(minWidth: 130, alignment: .leading)
 
-            // Grund
             Text(bewegung.grund.rawValue)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.caption).foregroundColor(.secondary)
                 .frame(minWidth: 100, alignment: .leading)
 
-            // Abgang
             Text(bewegung.datumAbgang.anzeigeText)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.caption).foregroundColor(.secondary)
+                .frame(width: 85, alignment: .leading)
 
             Spacer()
 
             // Erwartete Rückgabe
             if let er = bewegung.erwarteteRueckgabe {
-                Text("bis \(er.anzeigeText)")
+                Text(er.anzeigeText)
                     .font(.caption)
                     .foregroundColor(hervorheben ? .red : .secondary)
+                    .frame(width: 110, alignment: .trailing)
+            } else {
+                Text("–").font(.caption).foregroundColor(.secondary)
+                    .frame(width: 110, alignment: .trailing)
             }
 
-            // Schnell-Rückgabe-Button
-            Button("Zurück") {
-                zeigeRueckgabe = true
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+            // Pool-Badge
+            Image(systemName: bewegung.poolEingetragen ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(bewegung.poolEingetragen ? .green : .secondary)
+                .font(.caption)
+                .frame(width: 36, alignment: .center)
+
+            // Schnell-Rückgabe
+            Button("Zurück") { zeigeRueckgabe = true }
+                .buttonStyle(.bordered).controlSize(.small)
+                .frame(width: 90)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 12).padding(.vertical, 8)
         .background(hervorheben ? Color.red.opacity(0.07) : Color(.controlBackgroundColor))
         .sheet(isPresented: $zeigeRueckgabe) {
             BewegungErfassenView(modus: .rueckgabe(bewegung))
         }
-    }
-
-    // Schlüssel-ID → Kunden-ID auflösen
-    private var kundeId: Int64 {
-        vm.schluessel(id: bewegung.schluesselId)?.kundeId ?? 0
     }
 }

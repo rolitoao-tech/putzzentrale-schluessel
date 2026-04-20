@@ -7,170 +7,158 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F2DB5D46A3AE40A082125BB7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAEF970D8EB949FFA08CA297 /* EventKit.framework */; };
-		0F968332EC164F1499D1C4F0 /* PutzentraleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */; };
-		7FAC079516AE4C7789EDEA98 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E58B3F7AA08412C88DA98AE /* ContentView.swift */; };
-		3411E62C22A545B29A07940B /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2173DC7BABB448F284405505 /* DateFormatters.swift */; };
-		BDDFC3F8999644E5B6FDE8D7 /* Kunde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D7C6E8812494930BDA04544 /* Kunde.swift */; };
-		40650903CA534F6F8E8FA7D7 /* Putzfrau.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF72D309456242798F2E695C /* Putzfrau.swift */; };
-		0CC38FAC0BE84AF582585201 /* Schluessel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13C758BF1C224F08A55934F2 /* Schluessel.swift */; };
-		48BE0B5E38B343A193DD5F62 /* Bewegung.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */; };
-		E6ABDDB6EE5F4F5780BA9E33 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A757607C6714539BA6C3E45 /* DatabaseManager.swift */; };
-		080D7BF091E44EE1ABEB3376 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */; };
-		570E34916D0C4248B7DB6277 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */; };
-		0ED780CFC3404B6F9AE59331 /* SchluesselListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2058F9EB7F024507801C1550 /* SchluesselListView.swift */; };
-		364647BFB6B0480C8528C5F6 /* SchluesselDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */; };
-		50BEC8F764EC43FAA6F7A23B /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */; };
-		DE540D5650FE4AD3805F1191 /* KundenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6376C8DEFFC543459B85D407 /* KundenView.swift */; };
-		3C7ECBD24EC84E36B816D56C /* PutzfrauenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */; };
-		89969EF28E1C460F973FC57F /* SchluesselVerwaltungView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */; };
-		801D6BC8C22E41919F5B7A96 /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */; };
+		4DF6C3DAC69A4FAE982DD098 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08A02BDDE4C643F79CCEA8C8 /* EventKit.framework */; };
+		B2BCFA632C8848E6AD4A8920 /* PutzentraleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D91E6320364DC6B0237BB9 /* PutzentraleApp.swift */; };
+		CAFAC0E9FC24459E96382668 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C74F302D304997BAF90296 /* ContentView.swift */; };
+		A95EF0B2F1644AE59DF11B92 /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF13B9B351114C3B9B466818 /* DateFormatters.swift */; };
+		794019B58CA14ADABBE7E862 /* Kunde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77596D4E18E24D5995538F67 /* Kunde.swift */; };
+		D6F6BA44F79A4F9BAAC0DC1D /* Reinigungskraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172168C0344F4F8C8056CF9A /* Reinigungskraft.swift */; };
+		3A056D72C62C4BEB9E16C9F5 /* Bewegung.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A69E06C67BC4C1C9BAA03DC /* Bewegung.swift */; };
+		132768CAA064443BB870EB37 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D716731EB1B443897EA75F0 /* DatabaseManager.swift */; };
+		CA60BB12151E4E7E91E9E421 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE912D06E394266801CE0B3 /* AppViewModel.swift */; };
+		05BFA717053A406DBC5DD19B /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E86EDC3A1749ACB898F174 /* DashboardView.swift */; };
+		ECFE53E5E85D46CCB3B51DE0 /* SchluesselUebersichtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21F8CE5EC1E14FEEA1BD7CAD /* SchluesselUebersichtView.swift */; };
+		84D1CDD6AC174E8BAE7CEBAA /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC286474155444EB54DD4EE /* BewegungErfassenView.swift */; };
+		76AE1B019037487BB8BF04FF /* ReinigungskraefteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C68539B4C50E415FAE5F309A /* ReinigungskraefteView.swift */; };
+		3A27D8789D044F0A89AF7290 /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EEE3A87FA514824BA58DCFF /* ErinnerungsService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2107947555F947F5944C3610 /* Schlüsselverwaltung.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Schlüsselverwaltung.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AAEF970D8EB949FFA08CA297 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
-		9B2E97407A9449B4909BB2F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		86FF4BAE10104FC3894B995E /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
-		3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
-		2E58B3F7AA08412C88DA98AE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		2173DC7BABB448F284405505 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
-		8D7C6E8812494930BDA04544 /* Kunde.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kunde.swift; sourceTree = "<group>"; };
-		FF72D309456242798F2E695C /* Putzfrau.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Putzfrau.swift; sourceTree = "<group>"; };
-		13C758BF1C224F08A55934F2 /* Schluessel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schluessel.swift; sourceTree = "<group>"; };
-		A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bewegung.swift; sourceTree = "<group>"; };
-		8A757607C6714539BA6C3E45 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
-		6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
-		50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		2058F9EB7F024507801C1550 /* SchluesselListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselListView.swift; sourceTree = "<group>"; };
-		FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselDetailView.swift; sourceTree = "<group>"; };
-		65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
-		6376C8DEFFC543459B85D407 /* KundenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KundenView.swift; sourceTree = "<group>"; };
-		65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzfrauenView.swift; sourceTree = "<group>"; };
-		57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselVerwaltungView.swift; sourceTree = "<group>"; };
-		115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
+		45F5888A5505427F886AE0BA /* Schlüsselverwaltung.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Schlüsselverwaltung.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		08A02BDDE4C643F79CCEA8C8 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		615482C499BE40409E5D4C8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A74B1E238174B9FB012CA67 /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
+		12D91E6320364DC6B0237BB9 /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
+		F1C74F302D304997BAF90296 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CF13B9B351114C3B9B466818 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
+		77596D4E18E24D5995538F67 /* Kunde.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kunde.swift; sourceTree = "<group>"; };
+		172168C0344F4F8C8056CF9A /* Reinigungskraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reinigungskraft.swift; sourceTree = "<group>"; };
+		4A69E06C67BC4C1C9BAA03DC /* Bewegung.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bewegung.swift; sourceTree = "<group>"; };
+		9D716731EB1B443897EA75F0 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		0FE912D06E394266801CE0B3 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		50E86EDC3A1749ACB898F174 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		21F8CE5EC1E14FEEA1BD7CAD /* SchluesselUebersichtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselUebersichtView.swift; sourceTree = "<group>"; };
+		7AC286474155444EB54DD4EE /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
+		C68539B4C50E415FAE5F309A /* ReinigungskraefteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraefteView.swift; sourceTree = "<group>"; };
+		4EEE3A87FA514824BA58DCFF /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C74EAF9246CD4DC380902010 /* Frameworks */ = {
+		1D9DB13E761443DFB2623BCE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;
 			files = (
-				F2DB5D46A3AE40A082125BB7 /* EventKit.framework in Frameworks */,
+				4DF6C3DAC69A4FAE982DD098 /* EventKit.framework in Frameworks */,
 			); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		07912FCB164A4920B211B2A6 /*  */ = {
+		D70C7220ED1043829E93BC03 /*  */ = {
 			isa = PBXGroup;
 			children = (
-				5319CAAD15704B6CA479B48E /* Quellcode */,
-				C401708DFBD74B7CB36A484E /* Frameworks */,
-				328BC0ECC5C141F7B54B00F0 /* Products */,
+				F202B71939D643738A3327CA /* Quellcode */,
+				3F25D33927AA45E9A4B6A215 /* Frameworks */,
+				3A3819A45DE4489585F2CBF8 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		328BC0ECC5C141F7B54B00F0 /* Products */ = {
+		3A3819A45DE4489585F2CBF8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2107947555F947F5944C3610 /* Schlüsselverwaltung.app */,
+				45F5888A5505427F886AE0BA /* Schlüsselverwaltung.app */,
 			);
 			name = "Products";
 			sourceTree = "<group>";
 		};
-		C401708DFBD74B7CB36A484E /* Frameworks */ = {
+		3F25D33927AA45E9A4B6A215 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				AAEF970D8EB949FFA08CA297 /* EventKit.framework */,
+				08A02BDDE4C643F79CCEA8C8 /* EventKit.framework */,
 			);
 			name = "Frameworks";
 			sourceTree = "<group>";
 		};
-		5319CAAD15704B6CA479B48E /* Quellcode */ = {
+		F202B71939D643738A3327CA /* Quellcode */ = {
 			isa = PBXGroup;
 			children = (
-				3FE6C14AD0DE4035A322329E /* PutzentraleApp.swift */,
-				2E58B3F7AA08412C88DA98AE /* ContentView.swift */,
-				54E49EC8C1CD43319997DBB8 /* Models */,
-				ECB0F8BCE7BB4D8DAC2B4BF5 /* Utilities */,
-				E132386183DD4D14812E45EA /* Database */,
-				014BF477BEE34088867B0ECB /* ViewModels */,
-				ADE43EFDDDB94605AA2F1FE0 /* Views */,
-				CE95048B1888430387E60020 /* Services */,
-				9B2E97407A9449B4909BB2F6 /* Info.plist */,
-				86FF4BAE10104FC3894B995E /* Schlüsselverwaltung.entitlements */,
+				12D91E6320364DC6B0237BB9 /* PutzentraleApp.swift */,
+				F1C74F302D304997BAF90296 /* ContentView.swift */,
+				D5919C8D4BC2424298B5DF99 /* Models */,
+				2B73896A3F36432F9496DDF2 /* Utilities */,
+				C98ED428E8FC4A519AF502A7 /* Database */,
+				21E952012C1548E8A969A14D /* ViewModels */,
+				1FBC652B135B4AAD840EEF5B /* Views */,
+				38CDEBC5D28C47C1BDD058D1 /* Services */,
+				615482C499BE40409E5D4C8C /* Info.plist */,
+				4A74B1E238174B9FB012CA67 /* Schlüsselverwaltung.entitlements */,
 			);
 			name = "Quellcode";
 			path = "Quellcode";
 			sourceTree = "<group>";
 		};
-		54E49EC8C1CD43319997DBB8 /* Models */ = {
+		D5919C8D4BC2424298B5DF99 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8D7C6E8812494930BDA04544 /* Kunde.swift */,
-				FF72D309456242798F2E695C /* Putzfrau.swift */,
-				13C758BF1C224F08A55934F2 /* Schluessel.swift */,
-				A6AFD19D4CBF427D816F6BEE /* Bewegung.swift */,
+				77596D4E18E24D5995538F67 /* Kunde.swift */,
+				172168C0344F4F8C8056CF9A /* Reinigungskraft.swift */,
+				4A69E06C67BC4C1C9BAA03DC /* Bewegung.swift */,
 			);
 			name = "Models";
 			path = "Models";
 			sourceTree = "<group>";
 		};
-		ECB0F8BCE7BB4D8DAC2B4BF5 /* Utilities */ = {
+		2B73896A3F36432F9496DDF2 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				2173DC7BABB448F284405505 /* DateFormatters.swift */,
+				CF13B9B351114C3B9B466818 /* DateFormatters.swift */,
 			);
 			name = "Utilities";
 			path = "Utilities";
 			sourceTree = "<group>";
 		};
-		E132386183DD4D14812E45EA /* Database */ = {
+		C98ED428E8FC4A519AF502A7 /* Database */ = {
 			isa = PBXGroup;
 			children = (
-				8A757607C6714539BA6C3E45 /* DatabaseManager.swift */,
+				9D716731EB1B443897EA75F0 /* DatabaseManager.swift */,
 			);
 			name = "Database";
 			path = "Database";
 			sourceTree = "<group>";
 		};
-		014BF477BEE34088867B0ECB /* ViewModels */ = {
+		21E952012C1548E8A969A14D /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				6A4C10C5B20D4C74BE23F2EB /* AppViewModel.swift */,
+				0FE912D06E394266801CE0B3 /* AppViewModel.swift */,
 			);
 			name = "ViewModels";
 			path = "ViewModels";
 			sourceTree = "<group>";
 		};
-		ADE43EFDDDB94605AA2F1FE0 /* Views */ = {
+		1FBC652B135B4AAD840EEF5B /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				50C4682C52F04D6B90BCE1C5 /* DashboardView.swift */,
-				2058F9EB7F024507801C1550 /* SchluesselListView.swift */,
-				FFB30E0C96854CA8B94C3047 /* SchluesselDetailView.swift */,
-				65F206AB9A3D4079870B3C27 /* BewegungErfassenView.swift */,
-				0B53430E6AC44070B4239ACA /* Stammdaten */,
+				50E86EDC3A1749ACB898F174 /* DashboardView.swift */,
+				21F8CE5EC1E14FEEA1BD7CAD /* SchluesselUebersichtView.swift */,
+				7AC286474155444EB54DD4EE /* BewegungErfassenView.swift */,
+				76AC78B44DA14946BA53BFC2 /* Stammdaten */,
 			);
 			name = "Views";
 			path = "Views";
 			sourceTree = "<group>";
 		};
-		0B53430E6AC44070B4239ACA /* Stammdaten */ = {
+		76AC78B44DA14946BA53BFC2 /* Stammdaten */ = {
 			isa = PBXGroup;
 			children = (
-				6376C8DEFFC543459B85D407 /* KundenView.swift */,
-				65E5C17648DB48D2AAE1853C /* PutzfrauenView.swift */,
-				57F6DDDEDA6840A9B6F29FC4 /* SchluesselVerwaltungView.swift */,
+				C68539B4C50E415FAE5F309A /* ReinigungskraefteView.swift */,
 			);
 			name = "Stammdaten";
 			path = "Stammdaten";
 			sourceTree = "<group>";
 		};
-		CE95048B1888430387E60020 /* Services */ = {
+		38CDEBC5D28C47C1BDD058D1 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				115FD5F7B1FF41C780AC0226 /* ErinnerungsService.swift */,
+				4EEE3A87FA514824BA58DCFF /* ErinnerungsService.swift */,
 			);
 			name = "Services";
 			path = "Services";
@@ -179,64 +167,60 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E931C41B71DD4DBF86E6B8B5 /* Schlüsselverwaltung */ = {
+		745B85947797406AB7B7B394 /* Schlüsselverwaltung */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB5CC7C028A04F9F8D5CE0B5 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */;
-			buildPhases = (BBBFD3D234A34E8E8BA61C8D /* Sources */, C74EAF9246CD4DC380902010 /* Frameworks */, BD502D903EBE4107A7F5ED1F /* Resources */,);
+			buildConfigurationList = 452C07A23BD7458597941AB3 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */;
+			buildPhases = (748FC76B93E84F04902A4AD4 /* Sources */, 1D9DB13E761443DFB2623BCE /* Frameworks */, 088318AEC70E4F99B8B3CD4B /* Resources */,);
 			buildRules = (); dependencies = ();
 			name = "Schlüsselverwaltung"; productName = "Schlüsselverwaltung";
-			productReference = 2107947555F947F5944C3610 /* Schlüsselverwaltung.app */;
+			productReference = 45F5888A5505427F886AE0BA /* Schlüsselverwaltung.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		C7DA4BDB8C2F429FAE2313E3 /* Project object */ = {
+		59B588DE1C66463CBC839368 /* Project object */ = {
 			isa = PBXProject;
-			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; TargetAttributes = { E931C41B71DD4DBF86E6B8B5 = { CreatedOnToolsVersion = 16.0; }; }; };
-			buildConfigurationList = 3FEFA10E30A64AFEBE71BEE9 /* Build configuration list for PBXProject "Schlüsselverwaltung" */;
+			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; TargetAttributes = { 745B85947797406AB7B7B394 = { CreatedOnToolsVersion = 16.0; }; }; };
+			buildConfigurationList = 691F272098DE4DC8AA9A703F /* Build configuration list for PBXProject "Schlüsselverwaltung" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (de, Base,);
-			mainGroup = 07912FCB164A4920B211B2A6;
-			productRefGroup = 328BC0ECC5C141F7B54B00F0 /* Products */;
+			mainGroup = D70C7220ED1043829E93BC03;
+			productRefGroup = 3A3819A45DE4489585F2CBF8 /* Products */;
 			projectDirPath = ""; projectRoot = "";
-			targets = (E931C41B71DD4DBF86E6B8B5 /* Schlüsselverwaltung */,);
+			targets = (745B85947797406AB7B7B394 /* Schlüsselverwaltung */,);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BD502D903EBE4107A7F5ED1F /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		088318AEC70E4F99B8B3CD4B /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		BBBFD3D234A34E8E8BA61C8D /* Sources */ = {
+		748FC76B93E84F04902A4AD4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
 			files = (
-				0F968332EC164F1499D1C4F0 /* PutzentraleApp.swift in Sources */,
-				7FAC079516AE4C7789EDEA98 /* ContentView.swift in Sources */,
-				3411E62C22A545B29A07940B /* DateFormatters.swift in Sources */,
-				BDDFC3F8999644E5B6FDE8D7 /* Kunde.swift in Sources */,
-				40650903CA534F6F8E8FA7D7 /* Putzfrau.swift in Sources */,
-				0CC38FAC0BE84AF582585201 /* Schluessel.swift in Sources */,
-				48BE0B5E38B343A193DD5F62 /* Bewegung.swift in Sources */,
-				E6ABDDB6EE5F4F5780BA9E33 /* DatabaseManager.swift in Sources */,
-				080D7BF091E44EE1ABEB3376 /* AppViewModel.swift in Sources */,
-				570E34916D0C4248B7DB6277 /* DashboardView.swift in Sources */,
-				0ED780CFC3404B6F9AE59331 /* SchluesselListView.swift in Sources */,
-				364647BFB6B0480C8528C5F6 /* SchluesselDetailView.swift in Sources */,
-				50BEC8F764EC43FAA6F7A23B /* BewegungErfassenView.swift in Sources */,
-				DE540D5650FE4AD3805F1191 /* KundenView.swift in Sources */,
-				3C7ECBD24EC84E36B816D56C /* PutzfrauenView.swift in Sources */,
-				89969EF28E1C460F973FC57F /* SchluesselVerwaltungView.swift in Sources */,
-				801D6BC8C22E41919F5B7A96 /* ErinnerungsService.swift in Sources */,
+				B2BCFA632C8848E6AD4A8920 /* PutzentraleApp.swift in Sources */,
+				CAFAC0E9FC24459E96382668 /* ContentView.swift in Sources */,
+				A95EF0B2F1644AE59DF11B92 /* DateFormatters.swift in Sources */,
+				794019B58CA14ADABBE7E862 /* Kunde.swift in Sources */,
+				D6F6BA44F79A4F9BAAC0DC1D /* Reinigungskraft.swift in Sources */,
+				3A056D72C62C4BEB9E16C9F5 /* Bewegung.swift in Sources */,
+				132768CAA064443BB870EB37 /* DatabaseManager.swift in Sources */,
+				CA60BB12151E4E7E91E9E421 /* AppViewModel.swift in Sources */,
+				05BFA717053A406DBC5DD19B /* DashboardView.swift in Sources */,
+				ECFE53E5E85D46CCB3B51DE0 /* SchluesselUebersichtView.swift in Sources */,
+				84D1CDD6AC174E8BAE7CEBAA /* BewegungErfassenView.swift in Sources */,
+				76AE1B019037487BB8BF04FF /* ReinigungskraefteView.swift in Sources */,
+				3A27D8789D044F0A89AF7290 /* ErinnerungsService.swift in Sources */,
 			); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		1D2F10C14BC647899F5B4AA1 /* Debug */ = {
+		AA3DB2DEE44E4C6091655675 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -245,7 +229,7 @@
 			};
 			name = Debug;
 		};
-		52F189704CBC4141A5531F91 /* Release */ = {
+		AF51736EBC7344C5BFE6A926 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -254,7 +238,7 @@
 			};
 			name = Release;
 		};
-		5EF8BA62724848CAA6394542 /* Debug */ = {
+		194D09577E7C4B6583CD1159 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -272,7 +256,7 @@
 			};
 			name = Debug;
 		};
-		5098D5ACD9154730B1844470 /* Release */ = {
+		37859B988BA849C4AD26603A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -291,10 +275,10 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3FEFA10E30A64AFEBE71BEE9 /* Build configuration list for PBXProject "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (1D2F10C14BC647899F5B4AA1 /* Debug */, 52F189704CBC4141A5531F91 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		FB5CC7C028A04F9F8D5CE0B5 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (5EF8BA62724848CAA6394542 /* Debug */, 5098D5ACD9154730B1844470 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		691F272098DE4DC8AA9A703F /* Build configuration list for PBXProject "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (AA3DB2DEE44E4C6091655675 /* Debug */, AF51736EBC7344C5BFE6A926 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		452C07A23BD7458597941AB3 /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (194D09577E7C4B6583CD1159 /* Debug */, 37859B988BA849C4AD26603A /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 	};
-	rootObject = C7DA4BDB8C2F429FAE2313E3 /* Project object */;
+	rootObject = 59B588DE1C66463CBC839368 /* Project object */;
 }

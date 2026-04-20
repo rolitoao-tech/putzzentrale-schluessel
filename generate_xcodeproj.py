@@ -19,18 +19,14 @@ SOURCE_FILES = [
     ("ContentView",              "ContentView.swift"),
     ("DateFormatters",           "Utilities/DateFormatters.swift"),
     ("Kunde",                    "Models/Kunde.swift"),
-    ("Putzfrau",                 "Models/Putzfrau.swift"),
-    ("Schluessel",               "Models/Schluessel.swift"),
+    ("Reinigungskraft",          "Models/Reinigungskraft.swift"),
     ("Bewegung",                 "Models/Bewegung.swift"),
     ("DatabaseManager",          "Database/DatabaseManager.swift"),
     ("AppViewModel",             "ViewModels/AppViewModel.swift"),
     ("DashboardView",            "Views/DashboardView.swift"),
-    ("SchluesselListView",       "Views/SchluesselListView.swift"),
-    ("SchluesselDetailView",     "Views/SchluesselDetailView.swift"),
+    ("SchluesselUebersichtView", "Views/SchluesselUebersichtView.swift"),
     ("BewegungErfassenView",     "Views/BewegungErfassenView.swift"),
-    ("KundenView",               "Views/Stammdaten/KundenView.swift"),
-    ("PutzfrauenView",           "Views/Stammdaten/PutzfrauenView.swift"),
-    ("SchluesselVerwaltungView", "Views/Stammdaten/SchluesselVerwaltungView.swift"),
+    ("ReinigungskraefteView",    "Views/Stammdaten/ReinigungskraefteView.swift"),
     ("ErinnerungsService",       "Services/ErinnerungsService.swift"),
 ]
 
@@ -135,7 +131,7 @@ def pbxproj():
           ])
 
     group(P["models_grp"], "Models", "Models",
-          [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in ["Kunde","Putzfrau","Schluessel","Bewegung"]])
+          [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in ["Kunde","Reinigungskraft","Bewegung"]])
 
     group(P["utilities_grp"], "Utilities", "Utilities",
           [f'{F["DateFormatters"][0]} /* DateFormatters.swift */,'])
@@ -146,13 +142,13 @@ def pbxproj():
     group(P["viewmodels_grp"], "ViewModels", "ViewModels",
           [f'{F["AppViewModel"][0]} /* AppViewModel.swift */,'])
 
-    view_names = ["DashboardView","SchluesselListView","SchluesselDetailView","BewegungErfassenView"]
+    view_names = ["DashboardView","SchluesselUebersichtView","BewegungErfassenView"]
     group(P["views_grp"], "Views", "Views",
           [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in view_names] +
           [f'{P["stammdaten_grp"]} /* Stammdaten */,'])
 
     group(P["stammdaten_grp"], "Stammdaten", "Stammdaten",
-          [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in ["KundenView","PutzfrauenView","SchluesselVerwaltungView"]])
+          [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in ["ReinigungskraefteView"]])
 
     group(P["services_grp"], "Services", "Services",
           [f'{F["ErinnerungsService"][0]} /* ErinnerungsService.swift */,'])

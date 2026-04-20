@@ -1,9 +1,8 @@
 import SwiftUI
 
-// Unterscheidung ob Abgang oder Rückgabe erfasst wird
 enum BewegungsModus {
-    case abgang
-    case rueckgabe(Bewegung)  // bestehende offene Bewegung
+    case abgang(vorausgewaehlt: Kunde? = nil)
+    case rueckgabe(Bewegung)
 }
 
 struct BewegungErfassenView: View {
@@ -11,35 +10,26 @@ struct BewegungErfassenView: View {
     @Environment(\.dismiss) private var dismiss
 
     let modus: BewegungsModus
-    // Wenn aus SchlüsselDetail aufgerufen, ist der Schlüssel schon bekannt
-    var vorausgewaehlterSchluessel: Schluessel? = nil
 
     // MARK: - Formular-Zustand (Abgang)
 
-    @State private var gewaehlterSchluessel: Schluessel?
-    @State private var gewaehlterPutzfrau: Putzfrau?
+    @State private var gewaehlterKunde: Kunde?
+    @State private var gewaehlteRK: Reinigungskraft?
     @State private var datumAbgang = Date()
     @State private var grund = BewegungGrund.einzelTermin
     @State private var setzeRueckgabedatum = true
     @State private var erwarteteRueckgabe = Date().addingTimeInterval(7 * 86400)
+    @State private var poolEingetragen = false
     @State private var notizen = ""
 
     // MARK: - Formular-Zustand (Rückgabe)
 
     @State private var datumRueckgabe = Date()
 
-    // MARK: - Mehrfach-Abgang (alle Schlüssel einer Putzfrau zurück)
-
-    @State private var mehrfachModus = false
-    @State private var gewaehlteSchluessel: Set<Int64> = []
-
-    // Fehlerbehandlung
-    @State private var fehlermeldung: String?
-
     var body: some View {
         switch modus {
-        case .abgang:
-            abgangFormular
+        case .abgang(let vorausgewaehlt):
+            abgangFormular(vorausgewaehlt: vorausgewaehlt)
         case .rueckgabe(let b):
             rueckgabeFormular(bewegung: b)
         }
@@ -47,15 +37,12 @@ struct BewegungErfassenView: View {
 
     // MARK: - Abgang-Formular
 
-    private var abgangFormular: some View {
+    private func abgangFormular(vorausgewaehlt: Kunde?) -> some View {
         VStack(spacing: 0) {
-            // Titel-Leiste
             HStack {
-                Text("Abgang erfassen")
-                    .font(.title3).fontWeight(.semibold)
+                Text("Abgang erfassen").font(.title3).fontWeight(.semibold)
                 Spacer()
-                Button("Abbrechen") { dismiss() }
-                    .keyboardShortcut(.escape)
+                Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
             }
             .padding()
             .background(Color(.windowBackgroundColor))
@@ -63,39 +50,30 @@ struct BewegungErfassenView: View {
             Divider()
 
             Form {
-                // Schlüssel-Auswahl
-                Section("Schlüssel") {
-                    if let vs = vorausgewaehlterSchluessel {
-                        LabeledContent("Schlüssel") {
-                            Text(vs.bezeichnung).foregroundColor(.secondary)
+                Section("Kunde") {
+                    if let k = vorausgewaehlt {
+                        LabeledContent("Kunde") {
+                            Text("\(k.name) (Nr. \(k.kundennummer))").foregroundColor(.secondary)
                         }
                     } else {
-                        Picker("Schlüssel", selection: $gewaehlterSchluessel) {
-                            Text("Bitte auswählen").tag(Optional<Schluessel>(nil))
-                            ForEach(verfuegbareSchluessel) { s in
-                                Text("\(s.bezeichnung) – \(vm.kundeName(id: s.kundeId))")
-                                    .tag(Optional(s))
+                        Picker("Kunde", selection: $gewaehlterKunde) {
+                            Text("Bitte auswählen").tag(Optional<Kunde>(nil))
+                            ForEach(verfuegbareKunden) { k in
+                                Text("\(k.kundennummer) – \(k.name)").tag(Optional(k))
                             }
                         }
                     }
                 }
 
-                // Empfängerin
-                Section("Empfängerin") {
-                    Picker("Putzfrau", selection: $gewaehlterPutzfrau) {
-                        Text("Bitte auswählen").tag(Optional<Putzfrau>(nil))
-                        ForEach(vm.putzfrauen.filter { $0.status != .inaktiv }) { p in
-                            HStack {
-                                Image(systemName: p.status.icon)
-                                    .foregroundColor(p.status.farbe)
-                                Text(p.name)
-                            }
-                            .tag(Optional(p))
+                Section("Reinigungskraft") {
+                    Picker("Reinigungskraft", selection: $gewaehlteRK) {
+                        Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
+                        ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
+                            Text(r.name).tag(Optional(r))
                         }
                     }
                 }
 
-                // Bewegungsdaten
                 Section("Details") {
                     DatePicker("Datum Abgang", selection: $datumAbgang, displayedComponents: .date)
                     Picker("Grund", selection: $grund) {
@@ -112,39 +90,32 @@ struct BewegungErfassenView: View {
                             displayedComponents: .date
                         )
                     }
+                    Toggle("Im Pool (CRM) eingetragen", isOn: $poolEingetragen)
                 }
 
-                // Notizen
                 Section("Notizen (optional)") {
-                    TextEditor(text: $notizen)
-                        .frame(height: 60)
-                }
-
-                // Fehlermeldung
-                if let fehler = fehlermeldung {
-                    Section {
-                        Label(fehler, systemImage: "exclamationmark.circle.fill")
-                            .foregroundColor(.red)
-                    }
+                    TextEditor(text: $notizen).frame(height: 60)
                 }
             }
             .formStyle(.grouped)
 
             Divider()
 
-            // Aktions-Leiste
             HStack {
                 Spacer()
                 Button("Abgang speichern") {
-                    abgangSpeichern()
+                    abgangSpeichern(vorausgewaehlt: vorausgewaehlt)
                 }
                 .keyboardShortcut(.return, modifiers: .command)
                 .buttonStyle(.borderedProminent)
-                .disabled(!abgangGueltig)
+                .disabled(!abgangGueltig(vorausgewaehlt: vorausgewaehlt))
             }
             .padding()
         }
-        .frame(width: 480, height: 520)
+        .frame(width: 480, height: 540)
+        .onAppear {
+            if let k = vorausgewaehlt { gewaehlterKunde = k }
+        }
     }
 
     // MARK: - Rückgabe-Formular
@@ -152,11 +123,9 @@ struct BewegungErfassenView: View {
     private func rueckgabeFormular(bewegung: Bewegung) -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Rückgabe erfassen")
-                    .font(.title3).fontWeight(.semibold)
+                Text("Rückgabe erfassen").font(.title3).fontWeight(.semibold)
                 Spacer()
-                Button("Abbrechen") { dismiss() }
-                    .keyboardShortcut(.escape)
+                Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
             }
             .padding()
             .background(Color(.windowBackgroundColor))
@@ -165,17 +134,14 @@ struct BewegungErfassenView: View {
 
             Form {
                 Section("Bewegung") {
-                    LabeledContent("Schlüssel") {
-                        Text(vm.schluesselName(id: bewegung.schluesselId))
-                            .foregroundColor(.secondary)
+                    LabeledContent("Kunde") {
+                        Text(vm.kundeName(id: bewegung.kundenId)).foregroundColor(.secondary)
                     }
-                    LabeledContent("Putzfrau") {
-                        Text(vm.putzfrauName(id: bewegung.putzfrauId))
-                            .foregroundColor(.secondary)
+                    LabeledContent("Reinigungskraft") {
+                        Text(vm.rkName(id: bewegung.reinigungskraftId)).foregroundColor(.secondary)
                     }
                     LabeledContent("Abgang am") {
-                        Text(bewegung.datumAbgang.anzeigeText)
-                            .foregroundColor(.secondary)
+                        Text(bewegung.datumAbgang.anzeigeText).foregroundColor(.secondary)
                     }
                 }
 
@@ -203,35 +169,33 @@ struct BewegungErfassenView: View {
             }
             .padding()
         }
-        .frame(width: 400, height: 320)
+        .frame(width: 400, height: 300)
     }
 
-    // MARK: - Hilfs-Methoden
+    // MARK: - Hilfsmethoden
 
-    // Nur Schlüssel anzeigen, die gerade im Büro sind (keine offene Bewegung)
-    private var verfuegbareSchluessel: [Schluessel] {
-        vm.schluessel.filter { s in
-            !s.verloren && vm.aktuellerInhaber(schluesselId: s.id) == nil
+    private var verfuegbareKunden: [Kunde] {
+        vm.kunden.filter { k in
+            k.aktiv && vm.aktiveBewegung(kundenId: k.id) == nil
         }
     }
 
-    private var abgangGueltig: Bool {
-        let schluesselOk = vorausgewaehlterSchluessel != nil || gewaehlterSchluessel != nil
-        return schluesselOk && gewaehlterPutzfrau != nil
+    private func abgangGueltig(vorausgewaehlt: Kunde?) -> Bool {
+        let kundeOk = vorausgewaehlt != nil || gewaehlterKunde != nil
+        return kundeOk && gewaehlteRK != nil
     }
 
-    private func abgangSpeichern() {
-        guard abgangGueltig else { return }
-
-        let sid = (vorausgewaehlterSchluessel ?? gewaehlterSchluessel)!.id
-        let pid = gewaehlterPutzfrau!.id
+    private func abgangSpeichern(vorausgewaehlt: Kunde?) {
+        let kid = (vorausgewaehlt ?? gewaehlterKunde)!.id
+        let rkid = gewaehlteRK!.id
 
         let bewegung = Bewegung(
-            schluesselId:       sid,
+            kundenId:           kid,
             datumAbgang:        datumAbgang,
-            putzfrauId:         pid,
+            reinigungskraftId:  rkid,
             grund:              grund,
             erwarteteRueckgabe: setzeRueckgabedatum ? erwarteteRueckgabe : nil,
+            poolEingetragen:    poolEingetragen,
             notizen:            notizen
         )
 
