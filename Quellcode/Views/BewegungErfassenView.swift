@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum BewegungsModus {
-    case abgang(vorausgewaehlt: Kunde? = nil)
+    case einfordern(vorausgewaehlt: Kunde? = nil)
     case rueckgabe(Bewegung)
 }
 
@@ -11,14 +11,15 @@ struct BewegungErfassenView: View {
 
     let modus: BewegungsModus
 
-    // MARK: - Formular-Zustand (Abgang)
+    // MARK: - Formular-Zustand (Einfordern)
 
     @State private var gewaehlterKunde: Kunde?
-    @State private var gewaehlteRK: Reinigungskraft?
     @State private var datumAbgang = Date()
     @State private var grund = BewegungGrund.einzelTermin
     @State private var setzeRueckgabedatum = true
     @State private var erwarteteRueckgabe = Date().addingTimeInterval(7 * 86400)
+    @State private var mitStellvertretung = false
+    @State private var gewaehlteStellvertretung: Reinigungskraft?
     @State private var poolEingetragen = false
     @State private var notizen = ""
 
@@ -28,19 +29,19 @@ struct BewegungErfassenView: View {
 
     var body: some View {
         switch modus {
-        case .abgang(let vorausgewaehlt):
-            abgangFormular(vorausgewaehlt: vorausgewaehlt)
+        case .einfordern(let vorausgewaehlt):
+            einfordernFormular(vorausgewaehlt: vorausgewaehlt)
         case .rueckgabe(let b):
             rueckgabeFormular(bewegung: b)
         }
     }
 
-    // MARK: - Abgang-Formular
+    // MARK: - Einfordern-Formular
 
-    private func abgangFormular(vorausgewaehlt: Kunde?) -> some View {
+    private func einfordernFormular(vorausgewaehlt: Kunde?) -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Abgang erfassen").font(.title3).fontWeight(.semibold)
+                Text("Schlüssel einfordern").font(.title3).fontWeight(.semibold)
                 Spacer()
                 Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
             }
@@ -55,6 +56,11 @@ struct BewegungErfassenView: View {
                         LabeledContent("Kunde") {
                             Text("\(k.name) (Nr. \(k.kundennummer))").foregroundColor(.secondary)
                         }
+                        if let rk = vm.zugeteilteReinigungskraft(kundenId: k.id) {
+                            LabeledContent("Zugeteilte RK") {
+                                Text(rk.name).foregroundColor(.secondary)
+                            }
+                        }
                     } else {
                         Picker("Kunde", selection: $gewaehlterKunde) {
                             Text("Bitte auswählen").tag(Optional<Kunde>(nil))
@@ -65,17 +71,8 @@ struct BewegungErfassenView: View {
                     }
                 }
 
-                Section("Reinigungskraft") {
-                    Picker("Reinigungskraft", selection: $gewaehlteRK) {
-                        Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
-                        ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
-                            Text(r.name).tag(Optional(r))
-                        }
-                    }
-                }
-
                 Section("Details") {
-                    DatePicker("Datum Abgang", selection: $datumAbgang, displayedComponents: .date)
+                    DatePicker("Datum Einfordern", selection: $datumAbgang, displayedComponents: .date)
                     Picker("Grund", selection: $grund) {
                         ForEach(BewegungGrund.allCases, id: \.self) { g in
                             Text(g.rawValue).tag(g)
@@ -84,12 +81,27 @@ struct BewegungErfassenView: View {
                     Toggle("Rückgabedatum setzen", isOn: $setzeRueckgabedatum)
                     if setzeRueckgabedatum {
                         DatePicker(
-                            "Erwartete Rückgabe",
+                            "Erwartet zurück",
                             selection: $erwarteteRueckgabe,
                             in: datumAbgang...,
                             displayedComponents: .date
                         )
                     }
+                }
+
+                Section("Stellvertretung") {
+                    Toggle("Direkt an Stellvertretung", isOn: $mitStellvertretung)
+                    if mitStellvertretung {
+                        Picker("Reinigungskraft", selection: $gewaehlteStellvertretung) {
+                            Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
+                            ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
+                                Text(r.name).tag(Optional(r))
+                            }
+                        }
+                    }
+                }
+
+                Section("CRM") {
                     Toggle("Im Pool (CRM) eingetragen", isOn: $poolEingetragen)
                 }
 
@@ -103,16 +115,16 @@ struct BewegungErfassenView: View {
 
             HStack {
                 Spacer()
-                Button("Abgang speichern") {
-                    abgangSpeichern(vorausgewaehlt: vorausgewaehlt)
+                Button("Speichern") {
+                    einfordernSpeichern(vorausgewaehlt: vorausgewaehlt)
                 }
                 .keyboardShortcut(.return, modifiers: .command)
                 .buttonStyle(.borderedProminent)
-                .disabled(!abgangGueltig(vorausgewaehlt: vorausgewaehlt))
+                .disabled(!einfordernGueltig(vorausgewaehlt: vorausgewaehlt))
             }
             .padding()
         }
-        .frame(width: 480, height: 540)
+        .frame(width: 480, height: 560)
         .onAppear {
             if let k = vorausgewaehlt { gewaehlterKunde = k }
         }
@@ -123,7 +135,7 @@ struct BewegungErfassenView: View {
     private func rueckgabeFormular(bewegung: Bewegung) -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Rückgabe erfassen").font(.title3).fontWeight(.semibold)
+                Text("Schlüssel zurückgegeben").font(.title3).fontWeight(.semibold)
                 Spacer()
                 Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
             }
@@ -137,10 +149,21 @@ struct BewegungErfassenView: View {
                     LabeledContent("Kunde") {
                         Text(vm.kundeName(id: bewegung.kundenId)).foregroundColor(.secondary)
                     }
-                    LabeledContent("Reinigungskraft") {
-                        Text(vm.rkName(id: bewegung.reinigungskraftId)).foregroundColor(.secondary)
+                    if let rkId = bewegung.stellvertretungRKId {
+                        LabeledContent("War bei") {
+                            Text(vm.rkName(id: rkId)).foregroundColor(.secondary)
+                        }
+                    } else {
+                        LabeledContent("War bei") {
+                            Text("Im Büro").foregroundColor(.secondary)
+                        }
                     }
-                    LabeledContent("Abgang am") {
+                    if let rk = vm.zugeteilteReinigungskraft(kundenId: bewegung.kundenId) {
+                        LabeledContent("Zurück an") {
+                            Text(rk.name).foregroundColor(.green)
+                        }
+                    }
+                    LabeledContent("Eingefordert am") {
                         Text(bewegung.datumAbgang.anzeigeText).foregroundColor(.secondary)
                     }
                 }
@@ -169,7 +192,7 @@ struct BewegungErfassenView: View {
             }
             .padding()
         }
-        .frame(width: 400, height: 300)
+        .frame(width: 400, height: 330)
     }
 
     // MARK: - Hilfsmethoden
@@ -180,23 +203,23 @@ struct BewegungErfassenView: View {
         }
     }
 
-    private func abgangGueltig(vorausgewaehlt: Kunde?) -> Bool {
+    private func einfordernGueltig(vorausgewaehlt: Kunde?) -> Bool {
         let kundeOk = vorausgewaehlt != nil || gewaehlterKunde != nil
-        return kundeOk && gewaehlteRK != nil
+        let stellvertretungOk = !mitStellvertretung || gewaehlteStellvertretung != nil
+        return kundeOk && stellvertretungOk
     }
 
-    private func abgangSpeichern(vorausgewaehlt: Kunde?) {
+    private func einfordernSpeichern(vorausgewaehlt: Kunde?) {
         let kid = (vorausgewaehlt ?? gewaehlterKunde)!.id
-        let rkid = gewaehlteRK!.id
 
         let bewegung = Bewegung(
-            kundenId:           kid,
-            datumAbgang:        datumAbgang,
-            reinigungskraftId:  rkid,
-            grund:              grund,
-            erwarteteRueckgabe: setzeRueckgabedatum ? erwarteteRueckgabe : nil,
-            poolEingetragen:    poolEingetragen,
-            notizen:            notizen
+            kundenId:             kid,
+            datumAbgang:          datumAbgang,
+            grund:                grund,
+            stellvertretungRKId:  mitStellvertretung ? gewaehlteStellvertretung?.id : nil,
+            erwarteteRueckgabe:   setzeRueckgabedatum ? erwarteteRueckgabe : nil,
+            poolEingetragen:      poolEingetragen,
+            notizen:              notizen
         )
 
         Task {

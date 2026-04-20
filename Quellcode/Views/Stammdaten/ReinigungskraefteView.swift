@@ -63,7 +63,12 @@ struct ReinigungskraefteView: View {
 // MARK: - Listenzeile
 
 struct ReinigungskraftZeile: View {
+    @EnvironmentObject var vm: AppViewModel
     let rk: Reinigungskraft
+
+    private var anzahlZugeteilt: Int {
+        vm.zugeteilteKunden(rkId: rk.id).count
+    }
 
     var body: some View {
         HStack {
@@ -72,6 +77,14 @@ struct ReinigungskraftZeile: View {
                 .frame(width: 8, height: 8)
             Text(rk.name).fontWeight(.medium)
             Spacer()
+            if anzahlZugeteilt > 0 {
+                Text("\(anzahlZugeteilt)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color.secondary.opacity(0.15))
+                    .clipShape(Capsule())
+            }
             if !rk.aktiv {
                 Text("Inaktiv").font(.caption2).foregroundColor(.secondary)
             }
@@ -91,29 +104,35 @@ struct ReinigungskraftDetail: View {
     @State private var zeigeAlleZurueck = false
     @State private var zeigeLoeschen = false
 
-    private var offeneBewegungen: [Bewegung] {
-        vm.bewegungen(fuerRK: rk.id, nurOffen: true)
+    private var zugeteilteKunden: [Kunde] {
+        vm.zugeteilteKunden(rkId: rk.id)
+    }
+
+    private var stellvertretungenOffen: [Bewegung] {
+        vm.bewegungen(fuerStellvertretung: rk.id, nurOffen: true)
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 kopfbereich
-                if !offeneBewegungen.isEmpty {
-                    offeneSektion
+
+                if !stellvertretungenOffen.isEmpty {
+                    stellvertretungsSektion
                 }
-                historieSektion
+
+                zugeteilteKundenSektion
             }
             .padding(20)
         }
         .confirmationDialog(
-            "Alle Schlüssel von \(rk.name) zurück?",
+            "Alle Stellvertreter-Schlüssel von \(rk.name) zurück?",
             isPresented: $zeigeAlleZurueck,
             titleVisibility: .visible
         ) {
-            Button("Alle zurück") { vm.alleSchluesselZurueck(vonRKId: rk.id) }
+            Button("Alle zurück") { vm.alleStellvertretungsSchluesselZurueck(vonRKId: rk.id) }
         } message: {
-            Text("\(offeneBewegungen.count) offene Bewegung(en) werden als zurückgegeben markiert.")
+            Text("\(stellvertretungenOffen.count) offene Stellvertretung(en) werden als zurückgegeben markiert.")
         }
         .confirmationDialog(
             "Reinigungskraft «\(rk.name)» löschen?",
@@ -122,7 +141,7 @@ struct ReinigungskraftDetail: View {
         ) {
             Button("Löschen", role: .destructive) { vm.rkLoeschen(id: rk.id) }
         } message: {
-            Text("Alle Bewegungen dieser Reinigungskraft bleiben erhalten.")
+            Text("Zugeteilte Kunden verlieren die Zuteilung. Bewegungen bleiben erhalten.")
         }
     }
 
@@ -138,18 +157,21 @@ struct ReinigungskraftDetail: View {
                             .clipShape(Capsule())
                     }
                 }
-                if !offeneBewegungen.isEmpty {
-                    Label("\(offeneBewegungen.count) Schlüssel im Umlauf", systemImage: "key.fill")
-                        .font(.caption).foregroundColor(.orange)
+                HStack(spacing: 12) {
+                    Label("\(zugeteilteKunden.count) zugeteilte Kunden", systemImage: "key.fill")
+                        .font(.caption).foregroundColor(.secondary)
+                    if !stellvertretungenOffen.isEmpty {
+                        Label("\(stellvertretungenOffen.count) Stellvertretung(en)", systemImage: "person.2.fill")
+                            .font(.caption).foregroundColor(.orange)
+                    }
                 }
             }
             Spacer()
             HStack {
                 Button("Bearbeiten") { onBearbeiten() }.buttonStyle(.bordered)
-                if !offeneBewegungen.isEmpty {
+                if !stellvertretungenOffen.isEmpty {
                     Button("Alle zurück") { zeigeAlleZurueck = true }
-                        .buttonStyle(.bordered)
-                        .foregroundColor(.orange)
+                        .buttonStyle(.bordered).foregroundColor(.orange)
                 }
                 Menu {
                     Button("Löschen", role: .destructive) { zeigeLoeschen = true }
@@ -161,11 +183,12 @@ struct ReinigungskraftDetail: View {
         }
     }
 
-    private var offeneSektion: some View {
+    private var stellvertretungsSektion: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Aktuell im Umlauf (\(offeneBewegungen.count))").font(.headline).foregroundColor(.orange)
+            Text("Aktuell als Stellvertretung (\(stellvertretungenOffen.count))")
+                .font(.headline).foregroundColor(.orange)
             VStack(spacing: 1) {
-                ForEach(offeneBewegungen) { b in
+                ForEach(stellvertretungenOffen) { b in
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(vm.kundeName(id: b.kundenId)).fontWeight(.medium)
@@ -174,8 +197,8 @@ struct ReinigungskraftDetail: View {
                             }
                         }
                         .frame(minWidth: 150, alignment: .leading)
-                        Text(b.datumAbgang.anzeigeText).font(.caption).foregroundColor(.secondary)
-                            .frame(width: 85, alignment: .leading)
+                        Text(b.grund.rawValue).font(.caption).foregroundColor(.secondary)
+                            .frame(width: 100, alignment: .leading)
                         Spacer()
                         if let er = b.erwarteteRueckgabe {
                             Text(er.anzeigeText)
@@ -183,8 +206,7 @@ struct ReinigungskraftDetail: View {
                                 .foregroundColor(b.status == .ueberfaellig ? .red : .secondary)
                         }
                         Image(systemName: b.status.icon)
-                            .foregroundColor(b.status.farbe)
-                            .font(.caption)
+                            .foregroundColor(b.status.farbe).font(.caption)
                     }
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(Color(.controlBackgroundColor))
@@ -194,39 +216,47 @@ struct ReinigungskraftDetail: View {
         }
     }
 
-    private var historieSektion: some View {
-        let alle = vm.bewegungen(fuerRK: rk.id)
-        return VStack(alignment: .leading, spacing: 8) {
-            Text("Bewegungshistorie (\(alle.count))").font(.headline)
-            if alle.isEmpty {
-                Text("Noch keine Bewegungen.").foregroundColor(.secondary)
+    private var zugeteilteKundenSektion: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Zugeteilte Kunden (\(zugeteilteKunden.count))").font(.headline)
+            if zugeteilteKunden.isEmpty {
+                Text("Keine Kunden zugeteilt.").foregroundColor(.secondary)
             } else {
                 VStack(spacing: 1) {
                     HStack {
-                        Text("Kunde").frame(minWidth: 150, alignment: .leading)
-                        Text("Abgang").frame(width: 85, alignment: .leading)
-                        Text("Grund").frame(width: 110, alignment: .leading)
+                        Text("Nr.").frame(width: 50, alignment: .leading)
+                        Text("Name").frame(minWidth: 150, alignment: .leading)
+                        Text("Wohnort").frame(minWidth: 100, alignment: .leading)
                         Spacer()
-                        Text("Rückgabe").frame(width: 85, alignment: .trailing)
+                        Text("Standort").frame(width: 120, alignment: .trailing)
                     }
                     .font(.caption).foregroundColor(.secondary)
                     .padding(.horizontal, 12).padding(.vertical, 5)
                     .background(Color.secondary.opacity(0.08))
 
-                    ForEach(alle) { b in
+                    ForEach(zugeteilteKunden) { k in
                         HStack {
-                            Text(vm.kundeName(id: b.kundenId))
-                                .frame(minWidth: 150, alignment: .leading)
-                            Text(b.datumAbgang.anzeigeText)
-                                .font(.caption).foregroundColor(.secondary)
-                                .frame(width: 85, alignment: .leading)
-                            Text(b.grund.rawValue)
-                                .font(.caption).foregroundColor(.secondary)
-                                .frame(width: 110, alignment: .leading)
+                            // Status-Punkt
+                            Circle()
+                                .fill(vm.aktiveBewegung(kundenId: k.id) != nil ? Color.orange : Color.green)
+                                .frame(width: 7, height: 7)
+                            Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
+                                .frame(width: 50, alignment: .leading)
+                            Text(k.name).frame(minWidth: 150, alignment: .leading)
+                            Text(k.wohnort).font(.caption).foregroundColor(.secondary)
+                                .frame(minWidth: 100, alignment: .leading)
                             Spacer()
-                            Text(b.datumRueckgabe.map { $0.anzeigeText } ?? "–")
-                                .font(.caption).foregroundColor(.secondary)
-                                .frame(width: 85, alignment: .trailing)
+                            if let b = vm.aktiveBewegung(kundenId: k.id) {
+                                Text(b.stellvertretungRKId != nil
+                                     ? "Bei \(vm.rkName(id: b.stellvertretungRKId!))"
+                                     : "Im Büro")
+                                    .font(.caption).foregroundColor(.orange)
+                                    .frame(width: 120, alignment: .trailing)
+                            } else {
+                                Text(k.standortText)
+                                    .font(.caption).foregroundColor(.secondary)
+                                    .frame(width: 120, alignment: .trailing)
+                            }
                         }
                         .padding(.horizontal, 12).padding(.vertical, 7)
                         .background(Color(.controlBackgroundColor))

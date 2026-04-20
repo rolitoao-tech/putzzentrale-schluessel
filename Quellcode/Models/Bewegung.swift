@@ -1,10 +1,9 @@
 import SwiftUI
 
 enum BewegungGrund: String, CaseIterable, Codable {
-    case stellvertretung = "Stellvertretung"
-    case ferien          = "Ferien"
-    case krankheit       = "Krankheit"
-    case einzelTermin    = "Einzel-Termin"
+    case ferien       = "Ferien"
+    case krankheit    = "Krankheit"
+    case einzelTermin = "Einzel-Termin"
 }
 
 enum BewegungStatus {
@@ -36,11 +35,11 @@ enum BewegungStatus {
 struct Bewegung: Identifiable, Hashable {
     var id: Int64 = 0
     var kundenId: Int64 = 0
-    var datumAbgang: Date = Date()
-    var reinigungskraftId: Int64 = 0
+    var datumAbgang: Date = Date()          // Datum Einfordern
     var grund: BewegungGrund = .einzelTermin
-    var erwarteteRueckgabe: Date? = nil
-    var datumRueckgabe: Date? = nil
+    var stellvertretungRKId: Int64? = nil   // nil = im Büro, sonst Stellvertretungs-RK
+    var erwarteteRueckgabe: Date? = nil     // Erwartete Rückgabe an zugeteilte RK
+    var datumRueckgabe: Date? = nil         // Tatsächliche Rückgabe an zugeteilte RK
     var poolEingetragen: Bool = false
     var notizen: String = ""
 

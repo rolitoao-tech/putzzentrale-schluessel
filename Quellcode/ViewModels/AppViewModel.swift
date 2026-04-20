@@ -38,20 +38,27 @@ class AppViewModel: ObservableObject {
         db.fetchBewegungen(kundenId: kid)
     }
 
-    func bewegungen(fuerRK rkId: Int64, nurOffen: Bool = false) -> [Bewegung] {
-        db.fetchBewegungen(reinigungskraftId: rkId, nurOffen: nurOffen)
+    // Bewegungen wo diese RK als Stellvertretung eingesetzt ist
+    func bewegungen(fuerStellvertretung rkId: Int64, nurOffen: Bool = false) -> [Bewegung] {
+        db.fetchBewegungen(stellvertretungRKId: rkId, nurOffen: nurOffen)
     }
 
-    // Schlüssel aktuell bei welcher Reinigungskraft?
-    func aktuelleReinigungskraft(kundenId: Int64) -> Reinigungskraft? {
-        guard let b = aktiveBewegung(kundenId: kundenId) else { return nil }
-        return reinigungskraft(id: b.reinigungskraftId)
+    // Alle Kunden die dieser RK fest zugeteilt sind
+    func zugeteilteKunden(rkId: Int64) -> [Kunde] {
+        kunden.filter { $0.zugeteilteReinigungskraftId == rkId }
+    }
+
+    func zugeteilteReinigungskraft(kundenId: Int64) -> Reinigungskraft? {
+        guard let k = kunde(id: kundenId), k.zugeteilteReinigungskraftId != 0
+        else { return nil }
+        return reinigungskraft(id: k.zugeteilteReinigungskraftId)
     }
 
     var ueberfaelligeBewegungen: [Bewegung] {
         offeneBewegungen.filter { $0.status == .ueberfaellig }
     }
 
+    // Schlüssel im Umlauf = Kunden mit offener Bewegung (nicht bei zugeteilter RK)
     var schluesselImUmlauf: Int {
         Set(offeneBewegungen.map(\.kundenId)).count
     }
@@ -74,7 +81,6 @@ class AppViewModel: ObservableObject {
         kunden.removeAll { $0.id == id }
     }
 
-    // Standort im Büro aktualisieren (nach Rückgabe)
     func standortAktualisieren(kundenId: Int64, typ: StandortTyp, detail: String) {
         guard var k = kunde(id: kundenId) else { return }
         k.standortTyp = typ; k.standortDetail = detail
@@ -101,18 +107,23 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Bewegungen
 
-    func abgangErfassen(_ b: Bewegung) async {
+    func schluesselEinfordern(_ b: Bewegung) async {
         db.insertBewegung(b)
         if let faellig = b.erwarteteRueckgabe {
             let kName = kundeName(id: b.kundenId)
-            let rName = rkName(id: b.reinigungskraftId)
+            let rkName = zugeteilteReinigungskraft(kundenId: b.kundenId)?.name ?? "–"
             await erinnerungen.erstelleRueckgabeErinnerung(
                 schluesselName: kName,
-                putzfrauName: rName,
+                putzfrauName: rkName,
                 faelligAm: faellig
             )
         }
         ladeAlles()
+    }
+
+    // Abwärtskompatibilität für bestehende View-Aufrufe
+    func abgangErfassen(_ b: Bewegung) async {
+        await schluesselEinfordern(b)
     }
 
     func rueckgabeEintragen(bewegungId: Int64, datum: Date = Date()) {
@@ -120,8 +131,9 @@ class AppViewModel: ObservableObject {
         ladeAlles()
     }
 
-    func alleSchluesselZurueck(vonRKId rkId: Int64) {
-        let offene = db.fetchBewegungen(reinigungskraftId: rkId, nurOffen: true)
+    // Alle Stellvertreter-Schlüssel einer RK zurückgeben
+    func alleStellvertretungsSchluesselZurueck(vonRKId rkId: Int64) {
+        let offene = db.fetchBewegungen(stellvertretungRKId: rkId, nurOffen: true)
         for b in offene { db.rueckgabeEintragen(bewegungId: b.id) }
         ladeAlles()
     }
@@ -133,6 +145,14 @@ class AppViewModel: ObservableObject {
 
     func bewegungLoeschen(id: Int64) {
         db.deleteBewegung(id: id)
+        ladeAlles()
+    }
+
+    // Stellvertretung auf bestehender Bewegung setzen
+    func stellvertretungSetzen(bewegungId: Int64, rkId: Int64?) {
+        guard var b = offeneBewegungen.first(where: { $0.id == bewegungId }) else { return }
+        b.stellvertretungRKId = rkId
+        db.updateBewegung(b)
         ladeAlles()
     }
 }

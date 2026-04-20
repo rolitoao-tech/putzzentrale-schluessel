@@ -24,6 +24,7 @@ struct Kunde: Identifiable, Hashable {
     var kundennummer: String = ""
     var name: String = ""
     var wohnort: String = ""
+    var zugeteilteReinigungskraftId: Int64 = 0  // 0 = keine Zuteilung
     // Standort im Büro: Safe (Haken 1–48) oder Dossier (Kürzel)
     var standortTyp: StandortTyp = .safe
     var standortDetail: String = ""  // z.B. "12" oder "SSI"

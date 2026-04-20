@@ -21,6 +21,9 @@ struct SchluesselUebersichtView: View {
         return liste
     }
 
+    @State private var ausgewaehlterKunde: Kunde?
+    @State private var zeigeNeuenKunden = false
+
     var body: some View {
         HSplitView {
             linkeSeite
@@ -34,7 +37,7 @@ struct SchluesselUebersichtView: View {
                     Label("Im Umlauf", systemImage: "arrow.left.arrow.right")
                 }
                 .toggleStyle(.button)
-                .help("Nur Schlüssel anzeigen, die gerade ausgegeben sind")
+                .help("Nur Schlüssel anzeigen, die gerade nicht bei der zugeteilten RK sind")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button { zeigeNeuenKunden = true } label: {
@@ -50,14 +53,10 @@ struct SchluesselUebersichtView: View {
         }
     }
 
-    @State private var ausgewaehlterKunde: Kunde?
-    @State private var zeigeNeuenKunden = false
-
     // MARK: - Linke Seite: Kundenliste
 
     private var linkeSeite: some View {
         VStack(spacing: 0) {
-            // Suchfeld
             HStack {
                 Image(systemName: "magnifyingglass").foregroundColor(.secondary)
                 TextField("Name, Kundennr., Wohnort", text: $suchtext)
@@ -74,7 +73,6 @@ struct SchluesselUebersichtView: View {
 
             Divider()
 
-            // Kopfzeile
             HStack {
                 Text("Nr.").frame(width: 50, alignment: .leading)
                 Text("Name").frame(minWidth: 120, alignment: .leading)
@@ -86,7 +84,6 @@ struct SchluesselUebersichtView: View {
             .padding(.horizontal, 12).padding(.vertical, 6)
             .background(Color.secondary.opacity(0.08))
 
-            // Liste
             List(gefiltert, selection: $ausgewaehlterKunde) { k in
                 KundenZeile(kunde: k).tag(k)
             }
@@ -122,7 +119,6 @@ struct KundenZeile: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            // Status-Punkt
             Circle()
                 .fill(statusFarbe)
                 .frame(width: 8, height: 8)
@@ -140,8 +136,6 @@ struct KundenZeile: View {
             .frame(minWidth: 120, alignment: .leading)
 
             Spacer()
-
-            // Standort-Badge
             standortBadge
         }
         .padding(.vertical, 3)
@@ -155,18 +149,37 @@ struct KundenZeile: View {
 
     @ViewBuilder
     private var standortBadge: some View {
-        if let rk = vm.aktuelleReinigungskraft(kundenId: kunde.id) {
-            Label(rk.name, systemImage: "person.fill")
-                .font(.caption2).foregroundColor(.orange)
-                .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(Color.orange.opacity(0.12))
-                .clipShape(Capsule())
+        if let b = vm.aktiveBewegung(kundenId: kunde.id) {
+            if let rkId = b.stellvertretungRKId {
+                // Bei Stellvertretung
+                Label(vm.rkName(id: rkId), systemImage: "person.2.fill")
+                    .font(.caption2).foregroundColor(.orange)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.12))
+                    .clipShape(Capsule())
+            } else {
+                // Im Büro
+                Label("Im Büro", systemImage: "building.2.fill")
+                    .font(.caption2).foregroundColor(.orange)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.12))
+                    .clipShape(Capsule())
+            }
         } else {
-            Label(kunde.standortText, systemImage: kunde.standortTyp.icon)
-                .font(.caption2).foregroundColor(.green)
-                .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(Color.green.opacity(0.10))
-                .clipShape(Capsule())
+            // Normalzustand: bei zugeteilter RK
+            if let rk = vm.zugeteilteReinigungskraft(kundenId: kunde.id) {
+                Label(rk.name, systemImage: "person.fill")
+                    .font(.caption2).foregroundColor(.green)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color.green.opacity(0.10))
+                    .clipShape(Capsule())
+            } else {
+                Label(kunde.standortText, systemImage: kunde.standortTyp.icon)
+                    .font(.caption2).foregroundColor(.secondary)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color.secondary.opacity(0.10))
+                    .clipShape(Capsule())
+            }
         }
     }
 }
@@ -177,7 +190,6 @@ struct KundeDetailView: View {
     @EnvironmentObject var vm: AppViewModel
     @State private var kunde: Kunde
     @State private var zeigeBearbeiten = false
-    @State private var zeigeAbgang = false
     @State private var zeigeLoeschen = false
 
     let onAktualisiert: (Kunde) -> Void
@@ -207,9 +219,6 @@ struct KundeDetailView: View {
                 zeigeBearbeiten = false
             }
         }
-        .sheet(isPresented: $zeigeAbgang) {
-            BewegungErfassenView(modus: .abgang(vorausgewaehlt: kunde))
-        }
         .confirmationDialog("Kunde «\(kunde.name)» löschen?", isPresented: $zeigeLoeschen, titleVisibility: .visible) {
             Button("Löschen", role: .destructive) { vm.kundeLoeschen(id: kunde.id) }
         } message: { Text("Alle Bewegungen dieses Kunden werden ebenfalls gelöscht.") }
@@ -237,6 +246,9 @@ struct KundeDetailView: View {
                     if !kunde.wohnort.isEmpty {
                         Label(kunde.wohnort, systemImage: "mappin.circle")
                     }
+                    if let rk = vm.zugeteilteReinigungskraft(kundenId: kunde.id) {
+                        Label(rk.name, systemImage: "person.fill").foregroundColor(.green)
+                    }
                 }
                 .font(.caption).foregroundColor(.secondary)
             }
@@ -244,9 +256,6 @@ struct KundeDetailView: View {
             HStack {
                 Button("Bearbeiten") { zeigeBearbeiten = true }.buttonStyle(.bordered)
                 Menu {
-                    Button("Abgang erfassen") { zeigeAbgang = true }
-                        .disabled(aktiveBewegung != nil)
-                    Divider()
                     Button("Löschen", role: .destructive) { zeigeLoeschen = true }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -258,36 +267,15 @@ struct KundeDetailView: View {
 
     // MARK: - Standort-Karte
 
+    @ViewBuilder
     private var standortKarte: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Aktueller Standort").font(.headline)
 
-            if let b = aktiveBewegung, let rk = vm.reinigungskraft(id: b.reinigungskraftId) {
-                // Schlüssel ist ausgegeben
-                HStack(spacing: 12) {
-                    Image(systemName: "person.fill").foregroundColor(.orange)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Bei \(rk.name)").fontWeight(.medium)
-                        Text("Seit \(b.datumAbgang.anzeigeText) · \(b.grund.rawValue)")
-                            .font(.caption).foregroundColor(.secondary)
-                        if let er = b.erwarteteRueckgabe {
-                            Text("Erwartet am \(er.anzeigeText)")
-                                .font(.caption)
-                                .foregroundColor(b.status == .ueberfaellig ? .red : .secondary)
-                        }
-                    }
-                    Spacer()
-                    Button("Rückgabe erfassen") {
-                        vm.rueckgabeEintragen(bewegungId: b.id)
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                .padding(12)
-                .background(Color.orange.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            if let b = aktiveBewegung {
+                SchluesselUnterwegsKarte(bewegung: b, kunde: kunde)
             } else {
-                // Schlüssel ist im Büro
-                StandortImBueroKarte(kunde: $kunde)
+                SchluesselBeiRKKarte(kunde: $kunde)
             }
         }
     }
@@ -301,13 +289,12 @@ struct KundeDetailView: View {
                 Text("Noch keine Bewegungen.").foregroundColor(.secondary)
             } else {
                 VStack(spacing: 1) {
-                    // Kopfzeile
                     HStack {
-                        Text("Abgang").frame(width: 85, alignment: .leading)
-                        Text("Reinigungskraft").frame(minWidth: 130, alignment: .leading)
+                        Text("Eingefordert").frame(width: 90, alignment: .leading)
+                        Text("Aktuell bei").frame(minWidth: 130, alignment: .leading)
                         Text("Grund").frame(width: 110, alignment: .leading)
                         Text("Erwartet").frame(width: 85, alignment: .leading)
-                        Text("Rückgabe").frame(width: 85, alignment: .leading)
+                        Text("Zurück").frame(width: 85, alignment: .leading)
                         Spacer()
                         Text("Pool").frame(width: 36, alignment: .center)
                         Text("Status").frame(width: 85, alignment: .trailing)
@@ -326,49 +313,156 @@ struct KundeDetailView: View {
     }
 }
 
-// MARK: - Standort-Karte (bearbeitbar)
+// MARK: - Karte: Schlüssel nicht bei zugeteilter RK (Bewegung offen)
 
-struct StandortImBueroKarte: View {
+struct SchluesselUnterwegsKarte: View {
+    @EnvironmentObject var vm: AppViewModel
+    let bewegung: Bewegung
+    let kunde: Kunde
+    @State private var zeigeStellvertretung = false
+    @State private var zeigeRueckgabe = false
+
+    private var aufenthaltsort: String {
+        if let rkId = bewegung.stellvertretungRKId {
+            return "Bei \(vm.rkName(id: rkId)) (Stellvertretung)"
+        }
+        return "Im Büro"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                Image(systemName: bewegung.stellvertretungRKId != nil ? "person.2.fill" : "building.2.fill")
+                    .foregroundColor(.orange)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(aufenthaltsort).fontWeight(.medium).foregroundColor(.orange)
+                    Text("Eingefordert am \(bewegung.datumAbgang.anzeigeText) · \(bewegung.grund.rawValue)")
+                        .font(.caption).foregroundColor(.secondary)
+                    if let er = bewegung.erwarteteRueckgabe {
+                        Text("Erwartet zurück: \(er.anzeigeText)")
+                            .font(.caption)
+                            .foregroundColor(bewegung.status == .ueberfaellig ? .red : .secondary)
+                    }
+                }
+                Spacer()
+                VStack(spacing: 6) {
+                    if bewegung.stellvertretungRKId == nil {
+                        Button("An Stellvertretung") { zeigeStellvertretung = true }
+                            .buttonStyle(.bordered).controlSize(.small)
+                    }
+                    Button("Zurückgegeben") { zeigeRueckgabe = true }
+                        .buttonStyle(.borderedProminent).controlSize(.small)
+                }
+            }
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .sheet(isPresented: $zeigeStellvertretung) {
+            StellvertretungZuweisenView(bewegung: bewegung)
+        }
+        .sheet(isPresented: $zeigeRueckgabe) {
+            BewegungErfassenView(modus: .rueckgabe(bewegung))
+        }
+    }
+}
+
+// MARK: - Karte: Schlüssel bei zugeteilter RK (Normalzustand)
+
+struct SchluesselBeiRKKarte: View {
     @EnvironmentObject var vm: AppViewModel
     @Binding var kunde: Kunde
-    @State private var bearbeite = false
-    @State private var zeigeAbgang = false
-    @State private var typ: StandortTyp = .safe
-    @State private var detail = ""
+    @State private var zeigeEinfordern = false
+    @State private var zeigeStandort = false
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: kunde.standortTyp.icon).foregroundColor(.green)
+            Image(systemName: "person.fill").foregroundColor(.green)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Im Büro").fontWeight(.medium).foregroundColor(.green)
-                Text(kunde.standortText).font(.caption).foregroundColor(.secondary)
+                if let rk = vm.zugeteilteReinigungskraft(kundenId: kunde.id) {
+                    Text("Bei \(rk.name)").fontWeight(.medium).foregroundColor(.green)
+                    Text("Normalzustand · \(kunde.standortText) wenn zurück im Büro")
+                        .font(.caption).foregroundColor(.secondary)
+                } else {
+                    Text("Nicht zugeteilt").fontWeight(.medium).foregroundColor(.secondary)
+                    Text(kunde.standortText).font(.caption).foregroundColor(.secondary)
+                }
             }
             Spacer()
-            Button("Standort ändern") { bearbeite = true }
-                .buttonStyle(.bordered).controlSize(.small)
-            Button { zeigeAbgang = true } label: {
-                Label("Abgang erfassen", systemImage: "arrow.up.forward.circle")
+            VStack(spacing: 6) {
+                Button("Schlüssel einfordern") { zeigeEinfordern = true }
+                    .buttonStyle(.borderedProminent).controlSize(.small)
+                Button("Standort ändern") { zeigeStandort = true }
+                    .buttonStyle(.bordered).controlSize(.small)
             }
-            .buttonStyle(.borderedProminent).controlSize(.small)
         }
         .padding(12)
         .background(Color.green.opacity(0.07))
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .sheet(isPresented: $bearbeite) {
-            StandortFormular(typ: typ, detail: detail) { neuerTyp, neuesDetail in
+        .sheet(isPresented: $zeigeEinfordern) {
+            BewegungErfassenView(modus: .einfordern(vorausgewaehlt: kunde))
+        }
+        .sheet(isPresented: $zeigeStandort) {
+            StandortFormular(typ: kunde.standortTyp, detail: kunde.standortDetail) { neuerTyp, neuesDetail in
                 vm.standortAktualisieren(kundenId: kunde.id, typ: neuerTyp, detail: neuesDetail)
-                bearbeite = false
+                zeigeStandort = false
             }
         }
-        .sheet(isPresented: $zeigeAbgang) {
-            BewegungErfassenView(modus: .abgang(vorausgewaehlt: kunde))
+        .onReceive(vm.$kunden) { liste in
+            if let k = liste.first(where: { $0.id == kunde.id }) { kunde = k }
         }
-        .onAppear { typ = kunde.standortTyp; detail = kunde.standortDetail }
-        .onChange(of: kunde) { k in typ = k.standortTyp; detail = k.standortDetail }
     }
 }
 
-// Kleines Sheet zum Standort-Ändern
+// MARK: - Stellvertretung zuweisen (Sheet)
+
+struct StellvertretungZuweisenView: View {
+    @EnvironmentObject var vm: AppViewModel
+    @Environment(\.dismiss) private var dismiss
+    let bewegung: Bewegung
+    @State private var gewaehlteRK: Reinigungskraft?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Stellvertretung zuweisen").font(.title3).fontWeight(.semibold)
+                Spacer()
+                Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
+            }
+            .padding()
+            Divider()
+            Form {
+                Section("Reinigungskraft") {
+                    Picker("Stellvertretung", selection: $gewaehlteRK) {
+                        Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
+                        ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
+                            Text(r.name).tag(Optional(r))
+                        }
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            Divider()
+            HStack {
+                Spacer()
+                Button("Zuweisen") {
+                    if let rk = gewaehlteRK {
+                        vm.stellvertretungSetzen(bewegungId: bewegung.id, rkId: rk.id)
+                        dismiss()
+                    }
+                }
+                .keyboardShortcut(.return, modifiers: .command)
+                .buttonStyle(.borderedProminent)
+                .disabled(gewaehlteRK == nil)
+            }
+            .padding()
+        }
+        .frame(width: 360, height: 220)
+    }
+}
+
+// MARK: - Standort-Formular
+
 struct StandortFormular: View {
     @Environment(\.dismiss) private var dismiss
     @State private var typ: StandortTyp
@@ -435,11 +529,18 @@ struct HistorieZeile: View {
     let bewegung: Bewegung
     @State private var zeigeBearbeiten = false
 
+    private var aufenthaltsort: String {
+        if let rkId = bewegung.stellvertretungRKId { return vm.rkName(id: rkId) }
+        return bewegung.istOffen ? "Im Büro" : "–"
+    }
+
     var body: some View {
         HStack {
             Text(bewegung.datumAbgang.anzeigeText)
-                .font(.caption).frame(width: 85, alignment: .leading)
-            Text(vm.rkName(id: bewegung.reinigungskraftId))
+                .font(.caption).frame(width: 90, alignment: .leading)
+            Text(aufenthaltsort)
+                .font(.caption)
+                .foregroundColor(bewegung.stellvertretungRKId != nil ? .orange : .secondary)
                 .frame(minWidth: 130, alignment: .leading)
             Text(bewegung.grund.rawValue)
                 .font(.caption).frame(width: 110, alignment: .leading)
@@ -470,6 +571,7 @@ struct HistorieZeile: View {
 // MARK: - Kunde-Formular (Neu / Bearbeiten)
 
 struct KundeFormular: View {
+    @EnvironmentObject var vm: AppViewModel
     @Environment(\.dismiss) private var dismiss
 
     var vorlage: Kunde?
@@ -478,6 +580,7 @@ struct KundeFormular: View {
     @State private var kundennummer = ""
     @State private var name = ""
     @State private var wohnort = ""
+    @State private var zugeteilteRKId: Int64 = 0
     @State private var aktiv = true
     @State private var notizen = ""
 
@@ -501,6 +604,14 @@ struct KundeFormular: View {
                     TextField("Name", text: $name)
                     TextField("Wohnort (optional)", text: $wohnort)
                 }
+                Section("Zugeteilte Reinigungskraft") {
+                    Picker("Reinigungskraft", selection: $zugeteilteRKId) {
+                        Text("Keine Zuteilung").tag(Int64(0))
+                        ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
+                            Text(r.name).tag(r.id)
+                        }
+                    }
+                }
                 Section {
                     Toggle("Aktiv", isOn: $aktiv)
                 }
@@ -519,6 +630,7 @@ struct KundeFormular: View {
                     k.kundennummer = kundennummer.trimmingCharacters(in: .whitespaces)
                     k.name = name.trimmingCharacters(in: .whitespaces)
                     k.wohnort = wohnort.trimmingCharacters(in: .whitespaces)
+                    k.zugeteilteReinigungskraftId = zugeteilteRKId
                     k.aktiv = aktiv
                     k.notizen = notizen
                     onSpeichern(k)
@@ -530,12 +642,13 @@ struct KundeFormular: View {
             }
             .padding()
         }
-        .frame(width: 400, height: 420)
+        .frame(width: 420, height: 480)
         .onAppear {
             if let k = vorlage {
                 kundennummer = k.kundennummer
                 name = k.name
                 wohnort = k.wohnort
+                zugeteilteRKId = k.zugeteilteReinigungskraftId
                 aktiv = k.aktiv
                 notizen = k.notizen
             }

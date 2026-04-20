@@ -29,12 +29,12 @@ struct DashboardView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { zeigeNeueBewegung = true } label: {
-                    Label("Abgang erfassen", systemImage: "plus")
+                    Label("Schlüssel einfordern", systemImage: "plus")
                 }
             }
         }
         .sheet(isPresented: $zeigeNeueBewegung) {
-            BewegungErfassenView(modus: .abgang())
+            BewegungErfassenView(modus: .einfordern())
         }
     }
 
@@ -63,9 +63,9 @@ struct DashboardView: View {
                     // Kopfzeile
                     HStack {
                         Text("Kunde").frame(minWidth: 150, alignment: .leading)
-                        Text("Reinigungskraft").frame(minWidth: 130, alignment: .leading)
+                        Text("Aktuell bei").frame(minWidth: 130, alignment: .leading)
                         Text("Grund").frame(minWidth: 100, alignment: .leading)
-                        Text("Abgang").frame(width: 85, alignment: .leading)
+                        Text("Eingefordert").frame(width: 90, alignment: .leading)
                         Spacer()
                         Text("Erwartet zurück").frame(width: 110, alignment: .trailing)
                         Text("Pool").frame(width: 36, alignment: .center)
@@ -113,6 +113,13 @@ struct DashboardZeile: View {
 
     @State private var zeigeRueckgabe = false
 
+    private var aktuellerAufenthaltsort: String {
+        if let rkId = bewegung.stellvertretungRKId {
+            return vm.rkName(id: rkId)
+        }
+        return "Im Büro"
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: bewegung.status.icon)
@@ -127,7 +134,10 @@ struct DashboardZeile: View {
             }
             .frame(minWidth: 150, alignment: .leading)
 
-            Text(vm.rkName(id: bewegung.reinigungskraftId))
+            // Aktueller Aufenthaltsort
+            Text(aktuellerAufenthaltsort)
+                .font(.caption)
+                .foregroundColor(bewegung.stellvertretungRKId != nil ? .orange : .secondary)
                 .frame(minWidth: 130, alignment: .leading)
 
             Text(bewegung.grund.rawValue)
@@ -136,7 +146,7 @@ struct DashboardZeile: View {
 
             Text(bewegung.datumAbgang.anzeigeText)
                 .font(.caption).foregroundColor(.secondary)
-                .frame(width: 85, alignment: .leading)
+                .frame(width: 90, alignment: .leading)
 
             Spacer()
 
