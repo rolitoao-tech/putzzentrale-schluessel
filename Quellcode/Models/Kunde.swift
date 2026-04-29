@@ -1,11 +1,11 @@
-import SwiftUI
+import Foundation
 
 struct Kunde: Identifiable, Hashable {
-    var id: Int64 = 0
+    var id: UUID = UUID()
     var kundennummer: String = ""
     var name: String = ""
     var wohnort: String = ""
-    var zugeteilteReinigungskraftId: Int64 = 0  // 0 = keine Zuteilung
+    var zugeteilteReinigungskraftId: UUID? = nil
     var aktiv: Bool = true
     var notizen: String = ""
 }

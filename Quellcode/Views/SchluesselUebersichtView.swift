@@ -536,7 +536,7 @@ struct KundeFormular: View {
     @State private var kundennummer = ""
     @State private var name = ""
     @State private var wohnort = ""
-    @State private var zugeteilteRKId: Int64 = 0
+    @State private var zugeteilteRKId: UUID? = nil
     @State private var aktiv = true
     @State private var notizen = ""
 
@@ -560,9 +560,9 @@ struct KundeFormular: View {
                 }
                 Section("Zugeteilte Reinigungskraft") {
                     Picker("Reinigungskraft", selection: $zugeteilteRKId) {
-                        Text("Keine Zuteilung").tag(Int64(0))
+                        Text("Keine Zuteilung").tag(Optional<UUID>(nil))
                         ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
-                            Text(r.name).tag(r.id)
+                            Text(r.name).tag(Optional(r.id))
                         }
                     }
                 }

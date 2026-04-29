@@ -2,9 +2,12 @@ import SwiftUI
 
 @main
 struct PutzentraleApp: App {
+    private let persistence = PersistenceController.shared
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.managedObjectContext, persistence.viewContext)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))
@@ -15,6 +18,7 @@ struct PutzentraleApp: App {
 
         Settings {
             EinstellungenView()
+                .environment(\.managedObjectContext, persistence.viewContext)
         }
     }
 }

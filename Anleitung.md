@@ -1,127 +1,112 @@
-# Xcode-Projekteinrichtung — Putzzentrale Schlüsselverwaltung
+# Putzzentrale – Schlüsselverwaltung
+
+Native macOS-App für die zentrale Verwaltung von Kunden-Schlüsseln und Reinigungskräften der PutzZentrale.ch Zürichsee GmbH.
 
 ## Voraussetzungen
 
 - Xcode 16 oder neuer
-- macOS 26 (Deployment Target: macOS 13)
+- macOS 13 oder neuer (Deployment Target)
+- iCloud-Account auf jedem Mac, der die App nutzt
+- Apple Developer Programm (Team `9UUZ8K43EJ`)
 
----
-
-## 1. Neues Xcode-Projekt erstellen
-
-1. Xcode öffnen → **File › New › Project**
-2. Plattform: **macOS**
-3. Template: **App**
-4. Einstellungen:
-   | Feld | Wert |
-   |------|------|
-   | Product Name | `Schlüsselverwaltung` |
-   | Bundle Identifier | `ch.putzzentrale.schluessel` |
-   | Interface | SwiftUI |
-   | Language | Swift |
-   | Storage | None |
-5. Speicherort: **dieses Verzeichnis** (`Putzzentrale - Schlüsselverwaltung/`)
-
----
-
-## 2. Quelldateien hinzufügen
-
-Die vorhandenen Swift-Dateien aus `Quellcode/` ins Xcode-Projekt ziehen:
+## Projektstruktur
 
 ```
 Quellcode/
-├── PutzentraleApp.swift        → ersetzt die generierte App-Datei
-├── ContentView.swift           → ersetzt die generierte ContentView
-├── Utilities/
-│   └── DateFormatters.swift
-├── Models/
-│   ├── Kunde.swift
-│   ├── Putzfrau.swift
-│   ├── Schluessel.swift
-│   └── Bewegung.swift
-├── Database/
-│   └── DatabaseManager.swift
-├── ViewModels/
-│   └── AppViewModel.swift
-├── Views/
-│   ├── DashboardView.swift
-│   ├── SchluesselListView.swift
-│   ├── SchluesselDetailView.swift
-│   ├── BewegungErfassenView.swift
+├── PutzentraleApp.swift              App-Einstieg, injiziert PersistenceController
+├── ContentView.swift                 NavigationSplitView mit Sidebar
+├── Models/                           Wert-Structs (Kunde, Reinigungskraft, Bewegung)
+├── Persistence/
+│   ├── PersistenceController.swift   NSPersistentCloudKitContainer (Private + Shared Store)
+│   └── Schluesselverwaltung.xcdatamodeld   Core-Data-Modell
+├── Repositories/                     Mapping NSManagedObject ↔ Wert-Struct
+├── ViewModels/AppViewModel.swift     Beobachtbare Listen, beobachtet CloudKit-Änderungen
+├── Views/                            SwiftUI-Ansichten
+│   ├── DashboardView.swift           Pendenzen-Übersicht, Kennzahlen
+│   ├── SchluesselUebersichtView.swift Kunden-Liste mit Detailansicht
+│   ├── BewegungErfassenView.swift    Schlüssel einfordern / Rückgabe
+│   ├── EinstellungenView.swift       iCloud-Status, Erinnerungs-Liste
 │   └── Stammdaten/
-│       ├── KundenView.swift
-│       ├── PutzfrauenView.swift
-│       └── SchluesselVerwaltungView.swift
-└── Services/
-    └── ErinnerungsService.swift
+│       └── ReinigungskraefteView.swift
+├── Services/ErinnerungsService.swift EventKit-Integration (lokal pro Mac)
+└── Utilities/DateFormatters.swift    dd.MM.yyyy-Anzeige
 ```
 
-**Wichtig beim Import:** Häkchen bei **"Copy items if needed"** setzen.
+## Datenmodell
 
----
+Drei Entitäten:
 
-## 3. Framework hinzufügen
+| Entität          | Kernfelder |
+|------------------|-----------|
+| **Kunde**        | kundennummer, name, wohnort, zugeteilteReinigungskraft, aktiv, notizen |
+| **Reinigungskraft** | name, aktiv, notizen |
+| **Bewegung**     | kunde, datumAbgang, grund, stellvertretungRK, bueroAblage, erwarteteRueckgabe, datumRueckgabe, poolEingetragen, notizen, Audit-Felder |
 
-Für macOS-Erinnerungen wird EventKit benötigt:
+IDs sind `UUID` (CloudKit-`recordName`). Status einer Bewegung wird **berechnet**: Offen / Überfällig / Zurück. Schlüssel sind keine eigene Entität – sie sind über die Beziehung Kunde ↔ Bewegung modelliert.
 
-1. Projekt in der Sidebar anklicken → Target **Schlüsselverwaltung**
-2. Tab **General** → Abschnitt **Frameworks, Libraries, and Embedded Content**
-3. **+** → `EventKit.framework` suchen und hinzufügen
+## Datenhaltung
 
----
+Die App verwendet **Core Data + CloudKit** über `NSPersistentCloudKitContainer`:
 
-## 4. Info.plist anpassen
+- Daten werden lokal in einem Core-Data-SQLite-Store gehalten (im App-Container).
+- CloudKit synchronisiert sie automatisch zwischen allen angemeldeten Macs.
+- Über CloudKit Sharing (CKShare) können bis zu drei Mitarbeitende denselben Datenbestand sehen und bearbeiten.
 
-Im **Info.plist** (oder unter Target → Info) folgenden Eintrag hinzufügen:
+Details siehe `ARCHITEKTUR_CLOUDKIT.md`.
 
-| Key | Value |
-|-----|-------|
-| `NSRemindersUsageDescription` | `Putzzentrale erstellt Erinnerungen für Schlüssel-Rückgabetermine.` |
-
----
-
-## 5. Entitlements anpassen
-
-In der Datei `Schlüsselverwaltung.entitlements` (wird von Xcode automatisch erstellt):
-
-```xml
-<key>com.apple.security.personal-information.reminders</key>
-<true/>
+**Lokaler Datenbankpfad** (intern, normalerweise nicht relevant):
+```
+~/Library/Containers/ch.pzschluessel/Data/Library/Application Support/Schluesselverwaltung.sqlite
 ```
 
-So navigieren: Target → **Signing & Capabilities** → **+** → **Reminders**
+## Erstes Setup (einmalig pro Mac)
 
----
+1. **Apple-ID** in den macOS-Systemeinstellungen anmelden, **iCloud Drive aktiviert** lassen.
+2. App starten — beim ersten Lauf:
+   - macOS fragt nach Berechtigung für **Erinnerungen** (für Rückgabe-Termine).
+   - Daten aus CloudKit werden automatisch geladen, sobald die Freigabe akzeptiert wurde.
 
-## 6. Deployment Target setzen
+## Apple-Developer-Setup (einmalig fürs Projekt)
 
-Target → **General** → **Minimum Deployments**:
-- macOS: **13.0**
+Im Apple Developer Portal beim Team `9UUZ8K43EJ`:
 
----
+1. App-ID `ch.pzschluessel` registrieren mit den Capabilities:
+   - **iCloud (CloudKit)**
+   - **Push Notifications**
+2. CloudKit-Container `iCloud.ch.pzschluessel` erstellen.
 
-## 7. Datenbankpfad
+Die Entitlements sind in `Quellcode/Schlüsselverwaltung.entitlements` bereits vorbereitet.
 
-Die SQLite-Datenbank wird automatisch erstellt unter:
+## Build und Start
 
-```
-~/Library/Application Support/ch.putzzentrale.schluessel/schluessel.sqlite
-```
+1. Xcode-Projekt regenerieren (sofern nicht vorhanden):
+   ```
+   python3 generate_xcodeproj.py
+   ```
+2. `Schlüsselverwaltung.xcodeproj` in Xcode öffnen.
+3. **⌘R** zum Starten.
 
-Beim ersten Start legt `DatabaseManager` diesen Pfad und alle Tabellen selbst an — keine manuelle Einrichtung nötig.
+Beim ersten Start fragt macOS nach Erinnerungen-Berechtigung.
 
----
+## Mehrbenutzer (3 Mitarbeitende, alle sehen alles)
 
-## 8. App starten
+Eine Person erstellt den Datenbestand und teilt ihn per CloudKit-Sharing mit den anderen zwei Macs. Die geteilten Daten erscheinen automatisch.
 
-`⌘R` — beim ersten Start erscheint ein Systemdialog zur Freigabe der Erinnerungen-App.
+> **Hinweis**: Die Sharing-UI (Freigabe-Sheet) wird in einer späteren Ausbaustufe in den Einstellungen ergänzt.
 
----
+## Erinnerungen (EventKit)
 
-## Backup / Datensicherung
+EventKit-Erinnerungen sind **lokal pro Mac** – sie werden nicht synchronisiert. Wenn eine neue Bewegung erfasst wird, erstellt nur der erfassende Mac eine Erinnerung in der macOS-Erinnerungen-App.
 
-Für ein manuelles Backup genügt es, die Datenbankdatei zu kopieren:
+Die zu verwendende Erinnerungs-Liste lässt sich in den App-Einstellungen (⌘,) auswählen.
 
-```bash
-cp ~/Library/Application\ Support/ch.putzzentrale.schluessel/schluessel.sqlite ~/Desktop/backup_$(date +%Y%m%d).sqlite
-```
+## Wichtige fachliche Regeln
+
+- Das **Büro ist die zentrale Drehscheibe** – Schlüssel gehen nicht direkt von Reinigungskraft zu Reinigungskraft.
+- Schlüssel sind im Normalzustand bei der zugeteilten Reinigungskraft. Bei Ferien, Krankheit oder Einzel-Terminen werden sie eingefordert (Bewegung erfasst).
+- Überfällige Bewegungen werden im Dashboard **rot** hervorgehoben.
+- Pflichtfelder beim Erfassen einer Bewegung: Kunde, Grund, Ablage (Safe / Dossier / Stellvertretung), Pool-Eintrag im CRM.
+
+## Backup
+
+Bei CloudKit ist ein klassisches Backup nicht im selben Sinn nötig — Daten liegen auf Apples Servern und auf jedem angemeldeten Mac. Für ein Export-Feature siehe spätere Ausbaustufen.

@@ -297,14 +297,14 @@ struct BewegungErfassenView: View {
     }
 
     private func speichern(vorausgewaehlt: Kunde?, bestehendesBewegung: Bewegung?) {
-        let kundenId: Int64
+        let kundenId: UUID
         if let b = bestehendesBewegung {
             kundenId = b.kundenId
         } else {
             kundenId = (vorausgewaehlt ?? gewaehlterKunde)!.id
         }
 
-        let stv: Int64?
+        let stv: UUID?
         let ablage: BueroAblage?
         let ablageDetail: String
         switch ablageWahl {

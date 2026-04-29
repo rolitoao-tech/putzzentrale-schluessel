@@ -1,49 +1,62 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Generiert das Xcode-Projekt für Putzzentrale Schlüsselverwaltung
+# (Core Data + CloudKit, App-Sandbox)
 
 import uuid, os
 
-BASE_DIR          = "/Users/roli/Desktop/Claude Code/Putzzentrale - Schlüsselverwaltung"
+BASE_DIR          = os.path.dirname(os.path.abspath(__file__))
 APP_NAME          = "Schlüsselverwaltung"
-BUNDLE_ID         = "ch.putzzentrale.schluessel"
+BUNDLE_ID         = "ch.pzschluessel"
+DEVELOPMENT_TEAM  = "9UUZ8K43EJ"
 DEPLOYMENT_TARGET = "13.0"
 XCODEPROJ_DIR     = os.path.join(BASE_DIR, f"{APP_NAME}.xcodeproj")
 
 def new_id():
     return uuid.uuid4().hex[:24].upper()
 
-# Alle Quelldateien (Name, Pfad relativ zu Quellcode-Gruppe)
+# Alle Swift-Quelldateien (Name, Pfad relativ zu Quellcode-Gruppe)
 SOURCE_FILES = [
-    ("PutzentraleApp",           "PutzentraleApp.swift"),
-    ("ContentView",              "ContentView.swift"),
-    ("DateFormatters",           "Utilities/DateFormatters.swift"),
-    ("Kunde",                    "Models/Kunde.swift"),
-    ("Reinigungskraft",          "Models/Reinigungskraft.swift"),
-    ("Bewegung",                 "Models/Bewegung.swift"),
-    ("DatabaseManager",          "Database/DatabaseManager.swift"),
-    ("AppViewModel",             "ViewModels/AppViewModel.swift"),
-    ("DashboardView",            "Views/DashboardView.swift"),
-    ("SchluesselUebersichtView", "Views/SchluesselUebersichtView.swift"),
-    ("BewegungErfassenView",     "Views/BewegungErfassenView.swift"),
-    ("EinstellungenView",        "Views/EinstellungenView.swift"),
-    ("ReinigungskraefteView",    "Views/Stammdaten/ReinigungskraefteView.swift"),
-    ("ErinnerungsService",       "Services/ErinnerungsService.swift"),
+    ("PutzentraleApp",              "PutzentraleApp.swift"),
+    ("ContentView",                 "ContentView.swift"),
+    ("DateFormatters",              "Utilities/DateFormatters.swift"),
+    ("Kunde",                       "Models/Kunde.swift"),
+    ("Reinigungskraft",             "Models/Reinigungskraft.swift"),
+    ("Bewegung",                    "Models/Bewegung.swift"),
+    ("PersistenceController",       "Persistence/PersistenceController.swift"),
+    ("KundenRepository",            "Repositories/KundenRepository.swift"),
+    ("ReinigungskraftRepository",   "Repositories/ReinigungskraftRepository.swift"),
+    ("BewegungRepository",          "Repositories/BewegungRepository.swift"),
+    ("AppViewModel",                "ViewModels/AppViewModel.swift"),
+    ("DashboardView",               "Views/DashboardView.swift"),
+    ("SchluesselUebersichtView",    "Views/SchluesselUebersichtView.swift"),
+    ("BewegungErfassenView",        "Views/BewegungErfassenView.swift"),
+    ("EinstellungenView",           "Views/EinstellungenView.swift"),
+    ("ReinigungskraefteView",       "Views/Stammdaten/ReinigungskraefteView.swift"),
+    ("ErinnerungsService",          "Services/ErinnerungsService.swift"),
+]
+
+# Linker-Frameworks (Name, SDK-Pfad)
+FRAMEWORKS = [
+    ("EventKit",  "System/Library/Frameworks/EventKit.framework"),
+    ("CoreData",  "System/Library/Frameworks/CoreData.framework"),
+    ("CloudKit",  "System/Library/Frameworks/CloudKit.framework"),
 ]
 
 # UUIDs erzeugen
-P   = {n: new_id() for n in [
+P = {n: new_id() for n in [
     "proj", "target", "main_grp", "quellcode_grp", "products_grp", "frameworks_grp",
-    "models_grp", "utilities_grp", "database_grp", "viewmodels_grp",
-    "views_grp", "stammdaten_grp", "services_grp",
+    "models_grp", "utilities_grp", "persistence_grp", "repositories_grp",
+    "viewmodels_grp", "views_grp", "stammdaten_grp", "services_grp",
     "app_ref", "infoplist_ref", "entitlements_ref",
-    "eventkit_ref", "eventkit_build",
     "assets_ref", "assets_build",
+    "xcdm_inner_ref", "xcdm_group", "xcdm_build",
     "sources_phase", "frameworks_phase", "resources_phase",
     "proj_debug", "proj_release", "tgt_debug", "tgt_release",
     "proj_cfglist", "tgt_cfglist",
 ]}
-F = {name: (new_id(), new_id()) for name, _ in SOURCE_FILES}  # name -> (fileref, buildfile)
+F = {name: (new_id(), new_id()) for name, _ in SOURCE_FILES}        # source files
+FW = {name: (new_id(), new_id()) for name, _ in FRAMEWORKS}         # frameworks
 
 src_dict = dict(SOURCE_FILES)
 
@@ -62,8 +75,12 @@ def pbxproj():
 
     # --- PBXBuildFile ---
     L.append("/* Begin PBXBuildFile section */")
-    w(P["eventkit_build"], "/* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef =", P["eventkit_ref"], "/* EventKit.framework */; };")
+    for fwname, _ in FRAMEWORKS:
+        fref, fbuild = FW[fwname]
+        w(fbuild, f"/* {fwname}.framework in Frameworks */ = {{isa = PBXBuildFile; fileRef =", fref, f"/* {fwname}.framework */; }};")
     w(P["assets_build"], "/* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef =", P["assets_ref"], "/* Assets.xcassets */; };")
+    # Core-Data-Modell wird über die Sources-Phase kompiliert (nicht Resources)
+    w(P["xcdm_build"], "/* Schluesselverwaltung.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef =", P["xcdm_group"], "/* Schluesselverwaltung.xcdatamodeld */; };")
     for name, path in SOURCE_FILES:
         fname = os.path.basename(path)
         fref, fbuild = F[name]
@@ -74,10 +91,14 @@ def pbxproj():
     # --- PBXFileReference ---
     L.append("/* Begin PBXFileReference section */")
     w(P["app_ref"], f'/* {APP_NAME}.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "{APP_NAME}.app"; sourceTree = BUILT_PRODUCTS_DIR; }};')
-    w(P["eventkit_ref"], "/* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };")
+    for fwname, fwpath in FRAMEWORKS:
+        fref, _ = FW[fwname]
+        w(fref, f"/* {fwname}.framework */ = {{isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = {fwname}.framework; path = {fwpath}; sourceTree = SDKROOT; }};")
     w(P["assets_ref"], '/* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };')
     w(P["infoplist_ref"], '/* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };')
     w(P["entitlements_ref"], f'/* {APP_NAME}.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "{APP_NAME}.entitlements"; sourceTree = "<group>"; }};')
+    # Innere .xcdatamodel-Datei (current version)
+    w(P["xcdm_inner_ref"], '/* Schluesselverwaltung.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Schluesselverwaltung.xcdatamodel; sourceTree = "<group>"; };')
     for name, path in SOURCE_FILES:
         fname = os.path.basename(path)
         fref, _ = F[name]
@@ -90,7 +111,9 @@ def pbxproj():
     L.append(f"\t\t{P['frameworks_phase']} /* Frameworks */ = {{")
     L.append("\t\t\tisa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;")
     L.append("\t\t\tfiles = (")
-    L.append(f"\t\t\t\t{P['eventkit_build']} /* EventKit.framework in Frameworks */,")
+    for fwname, _ in FRAMEWORKS:
+        _, fbuild = FW[fwname]
+        L.append(f"\t\t\t\t{fbuild} /* {fwname}.framework in Frameworks */,")
     L.append("\t\t\t); runOnlyForDeploymentPostprocessing = 0;")
     L.append("\t\t};")
     L.append("/* End PBXFrameworksBuildPhase section */")
@@ -118,15 +141,16 @@ def pbxproj():
     group(P["products_grp"], "Products", "",
           [f'{P["app_ref"]} /* {APP_NAME}.app */,'])
 
-    group(P["frameworks_grp"], "Frameworks", "",
-          [f'{P["eventkit_ref"]} /* EventKit.framework */,'])
+    fw_children = [f'{FW[n][0]} /* {n}.framework */,' for n, _ in FRAMEWORKS]
+    group(P["frameworks_grp"], "Frameworks", "", fw_children)
 
     root_files = [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in ["PutzentraleApp","ContentView"]]
     group(P["quellcode_grp"], "Quellcode", "Quellcode",
           root_files + [
               f'{P["models_grp"]} /* Models */,',
               f'{P["utilities_grp"]} /* Utilities */,',
-              f'{P["database_grp"]} /* Database */,',
+              f'{P["persistence_grp"]} /* Persistence */,',
+              f'{P["repositories_grp"]} /* Repositories */,',
               f'{P["viewmodels_grp"]} /* ViewModels */,',
               f'{P["views_grp"]} /* Views */,',
               f'{P["services_grp"]} /* Services */,',
@@ -141,8 +165,13 @@ def pbxproj():
     group(P["utilities_grp"], "Utilities", "Utilities",
           [f'{F["DateFormatters"][0]} /* DateFormatters.swift */,'])
 
-    group(P["database_grp"], "Database", "Database",
-          [f'{F["DatabaseManager"][0]} /* DatabaseManager.swift */,'])
+    group(P["persistence_grp"], "Persistence", "Persistence",
+          [f'{F["PersistenceController"][0]} /* PersistenceController.swift */,',
+           f'{P["xcdm_group"]} /* Schluesselverwaltung.xcdatamodeld */,'])
+
+    group(P["repositories_grp"], "Repositories", "Repositories",
+          [f'{F[n][0]} /* {os.path.basename(src_dict[n])} */,' for n in
+           ["KundenRepository", "ReinigungskraftRepository", "BewegungRepository"]])
 
     group(P["viewmodels_grp"], "ViewModels", "ViewModels",
           [f'{F["AppViewModel"][0]} /* AppViewModel.swift */,'])
@@ -159,6 +188,21 @@ def pbxproj():
           [f'{F["ErinnerungsService"][0]} /* ErinnerungsService.swift */,'])
 
     L.append("/* End PBXGroup section */")
+    L.append("")
+
+    # --- XCVersionGroup für .xcdatamodeld ---
+    L.append("/* Begin XCVersionGroup section */")
+    L.append(f'\t\t{P["xcdm_group"]} /* Schluesselverwaltung.xcdatamodeld */ = {{')
+    L.append('\t\t\tisa = XCVersionGroup;')
+    L.append('\t\t\tchildren = (')
+    L.append(f'\t\t\t\t{P["xcdm_inner_ref"]} /* Schluesselverwaltung.xcdatamodel */,')
+    L.append('\t\t\t);')
+    L.append(f'\t\t\tcurrentVersion = {P["xcdm_inner_ref"]} /* Schluesselverwaltung.xcdatamodel */;')
+    L.append('\t\t\tpath = Schluesselverwaltung.xcdatamodeld;')
+    L.append('\t\t\tsourceTree = "<group>";')
+    L.append('\t\t\tversionGroupType = wrapper.xcdatamodel;')
+    L.append('\t\t};')
+    L.append("/* End XCVersionGroup section */")
     L.append("")
 
     # --- PBXNativeTarget ---
@@ -204,6 +248,7 @@ def pbxproj():
     L.append(f'\t\t{P["sources_phase"]} /* Sources */ = {{')
     L.append("\t\t\tisa = PBXSourcesBuildPhase; buildActionMask = 2147483647;")
     L.append("\t\t\tfiles = (")
+    L.append(f"\t\t\t\t{P['xcdm_build']} /* Schluesselverwaltung.xcdatamodeld in Sources */,")
     for name, path in SOURCE_FILES:
         _, fbuild = F[name]
         fname = os.path.basename(path)
@@ -235,12 +280,14 @@ def pbxproj():
         **base,
         "CODE_SIGN_ENTITLEMENTS":   f'"Quellcode/{APP_NAME}.entitlements"',
         "CODE_SIGN_STYLE":          "Automatic",
+        "DEVELOPMENT_TEAM":         DEVELOPMENT_TEAM,
         "COMBINE_HIDPI_IMAGES":     "YES",
         "INFOPLIST_FILE":           '"Quellcode/Info.plist"',
         "PRODUCT_BUNDLE_IDENTIFIER": f'"{BUNDLE_ID}"',
         "PRODUCT_NAME":             f'"{APP_NAME}"',
         "SWIFT_EMIT_LOC_STRINGS":   "YES",
         "ASSETCATALOG_COMPILER_APPICON_NAME": '"AppIcon"',
+        "ENABLE_HARDENED_RUNTIME":  "YES",
     }
     cfg(P["tgt_debug"],   "Debug",   {**tgt_settings, "SWIFT_OPTIMIZATION_LEVEL": '"-Onone"', "DEBUG_INFORMATION_FORMAT": "dwarf"})
     cfg(P["tgt_release"], "Release", {**tgt_settings})

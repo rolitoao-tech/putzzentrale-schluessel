@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+*.xcuserdatad
+*.moved-aside
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+
+# Claude Code
+.claude/settings.local.json
+
+# Lokale SQLite-Daten (Altlast – wird nicht mehr verwendet, aber falls noch vorhanden)
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
