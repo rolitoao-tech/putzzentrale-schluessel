@@ -25,6 +25,8 @@
 		4DA3BDD74CAF41AB83DEC9C1 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB9656997B14F8FB37C60C1 /* AppViewModel.swift */; };
 		D518E9C4E1D942BD92ADE7B8 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DA80906311B4E51A30401C2 /* DashboardView.swift */; };
 		40ECB43424864AD59B3D1DE3 /* SchluesselUebersichtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590EA5E573564340AE9EB6D5 /* SchluesselUebersichtView.swift */; };
+		A1A2B3C4D5E6F708192A3B4C /* SchluesselbewegungenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A69788796A5B4 /* SchluesselbewegungenView.swift */; };
+		B2B3C4D5E6F708192A3B4C5D /* HistorieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F2E3D4C5B6A79889807B6C5 /* HistorieView.swift */; };
 		DA57B3C489BB47F4BA3A2448 /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9403EC98A2DB411B8AC45198 /* BewegungErfassenView.swift */; };
 		20D2BDC964C445088F0EBD5A /* EinstellungenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */; };
 		995F6CAAB2FE4FF0B99003BE /* ReinigungskraefteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126683290D564613B8ABB889 /* ReinigungskraefteView.swift */; };
@@ -53,6 +55,8 @@
 		CDB9656997B14F8FB37C60C1 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
 		9DA80906311B4E51A30401C2 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		590EA5E573564340AE9EB6D5 /* SchluesselUebersichtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselUebersichtView.swift; sourceTree = "<group>"; };
+		0F1E2D3C4B5A69788796A5B4 /* SchluesselbewegungenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselbewegungenView.swift; sourceTree = "<group>"; };
+		1F2E3D4C5B6A79889807B6C5 /* HistorieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistorieView.swift; sourceTree = "<group>"; };
 		9403EC98A2DB411B8AC45198 /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
 		27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EinstellungenView.swift; sourceTree = "<group>"; };
 		126683290D564613B8ABB889 /* ReinigungskraefteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraefteView.swift; sourceTree = "<group>"; };
@@ -173,6 +177,8 @@
 			children = (
 				9DA80906311B4E51A30401C2 /* DashboardView.swift */,
 				590EA5E573564340AE9EB6D5 /* SchluesselUebersichtView.swift */,
+				0F1E2D3C4B5A69788796A5B4 /* SchluesselbewegungenView.swift */,
+				1F2E3D4C5B6A79889807B6C5 /* HistorieView.swift */,
 				9403EC98A2DB411B8AC45198 /* BewegungErfassenView.swift */,
 				27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */,
 				5262C22FED5E47CE97D7BC3E /* Stammdaten */,
@@ -264,6 +270,8 @@
 				4DA3BDD74CAF41AB83DEC9C1 /* AppViewModel.swift in Sources */,
 				D518E9C4E1D942BD92ADE7B8 /* DashboardView.swift in Sources */,
 				40ECB43424864AD59B3D1DE3 /* SchluesselUebersichtView.swift in Sources */,
+				A1A2B3C4D5E6F708192A3B4C /* SchluesselbewegungenView.swift in Sources */,
+				B2B3C4D5E6F708192A3B4C5D /* HistorieView.swift in Sources */,
 				DA57B3C489BB47F4BA3A2448 /* BewegungErfassenView.swift in Sources */,
 				20D2BDC964C445088F0EBD5A /* EinstellungenView.swift in Sources */,
 				995F6CAAB2FE4FF0B99003BE /* ReinigungskraefteView.swift in Sources */,

@@ -1,16 +1,19 @@
 import SwiftUI
 
 enum Navigationsbereich: String, Hashable {
-    case dashboard        = "Übersicht"
-    case schluessel       = "Schlüssel-Übersicht"
-    case reinigungskraefte = "Reinigungskräfte"
+    case uebersicht           = "Übersicht"
+    case schluesselbewegungen = "Schlüsselbewegungen"
+    case historie             = "Historie"
+    case kunden               = "Kunden"
+    case reinigungskraefte    = "Reinigungskräfte"
 }
 
 struct ContentView: View {
     @StateObject private var vm = AppViewModel()
-    @State private var bereich: Navigationsbereich? = .dashboard
+    @State private var bereich: Navigationsbereich? = .uebersicht
     @State private var ausgewaehlterKunde: Kunde?
     @State private var ausgewaehlteRK: Reinigungskraft?
+    @State private var ausgewaehlteBewegung: Bewegung?
     @State private var spaltenSichtbarkeit: NavigationSplitViewVisibility = .all
 
     var body: some View {
@@ -30,17 +33,25 @@ struct ContentView: View {
 
     private var seitenleiste: some View {
         List(selection: $bereich) {
-            NavigationLink(value: Navigationsbereich.dashboard) {
+            NavigationLink(value: Navigationsbereich.uebersicht) {
                 Label("Übersicht", systemImage: "gauge.badge.plus")
             }
-            NavigationLink(value: Navigationsbereich.schluessel) {
-                Label("Schlüssel-Übersicht", systemImage: "key.fill")
+            NavigationLink(value: Navigationsbereich.schluesselbewegungen) {
+                Label("Schlüsselbewegungen", systemImage: "arrow.left.arrow.right")
+            }
+            NavigationLink(value: Navigationsbereich.historie) {
+                Label("Historie", systemImage: "clock.arrow.circlepath")
             }
 
-            Section("Stammdaten") {
+            Section {
+                NavigationLink(value: Navigationsbereich.kunden) {
+                    Label("Kunden", systemImage: "key.fill")
+                }
                 NavigationLink(value: Navigationsbereich.reinigungskraefte) {
                     Label("Reinigungskräfte", systemImage: "person.2.fill")
                 }
+            } header: {
+                Text("Stammdaten").padding(.leading, 4)
             }
         }
         .listStyle(.sidebar)
@@ -66,12 +77,16 @@ struct ContentView: View {
 
     @ViewBuilder
     private var inhaltsSpalte: some View {
-        switch bereich ?? .dashboard {
-        case .dashboard:
-            // Wird per spaltenSichtbarkeit ausgeblendet
+        switch bereich ?? .uebersicht {
+        case .uebersicht:
+            // Übersicht ist eine Vollbild-Ansicht — Listenspalte ungenutzt
             Color.clear
-        case .schluessel:
-            SchluesselUebersichtView(ausgewaehlterKunde: $ausgewaehlterKunde)
+        case .schluesselbewegungen:
+            SchluesselbewegungenView(auswahl: $ausgewaehlteBewegung)
+        case .historie:
+            HistorieView(auswahl: $ausgewaehlteBewegung)
+        case .kunden:
+            KundenView(ausgewaehlterKunde: $ausgewaehlterKunde)
         case .reinigungskraefte:
             ReinigungskraefteView(ausgewaehlt: $ausgewaehlteRK)
         }
@@ -81,14 +96,32 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detailSpalte: some View {
-        switch bereich ?? .dashboard {
-        case .dashboard:
+        switch bereich ?? .uebersicht {
+        case .uebersicht:
             DashboardView()
 
-        case .schluessel:
+        case .schluesselbewegungen:
+            if let b = ausgewaehlteBewegung,
+               let k = vm.kunde(id: b.kundenId) {
+                KundeDetailView(kunde: k, onAktualisiert: { _ in })
+                    .id(k.id)
+            } else {
+                leerZustand(symbol: "arrow.left.arrow.right", text: "Bewegung auswählen")
+            }
+
+        case .historie:
+            if let b = ausgewaehlteBewegung,
+               let k = vm.kunde(id: b.kundenId) {
+                KundeDetailView(kunde: k, onAktualisiert: { _ in })
+                    .id(k.id)
+            } else {
+                leerZustand(symbol: "clock.arrow.circlepath", text: "Bewegung auswählen")
+            }
+
+        case .kunden:
             if let k = ausgewaehlterKunde {
                 KundeDetailView(kunde: k, onAktualisiert: { ausgewaehlterKunde = $0 })
-                    .id(k.id)  // erzwingt Neuaufbau bei Kundenwechsel
+                    .id(k.id)
             } else {
                 leerZustand(symbol: "key.fill", text: "Kunde auswählen")
             }
@@ -102,6 +135,8 @@ struct ContentView: View {
             }
         }
     }
+
+    // MARK: - Platzhalter (werden in Folge-Iterationen ausgebaut)
 
     // MARK: - Leerzustand
 

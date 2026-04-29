@@ -6,6 +6,7 @@ class AppViewModel: ObservableObject {
     @Published var kunden: [Kunde] = []
     @Published var reinigungskraefte: [Reinigungskraft] = []
     @Published var offeneBewegungen: [Bewegung] = []
+    @Published var alleBewegungen: [Bewegung] = []
 
     let erinnerungen = ErinnerungsService()
 
@@ -45,7 +46,8 @@ class AppViewModel: ObservableObject {
     func ladeAlles() {
         kunden            = kundenRepo.alleLaden()
         reinigungskraefte = rkRepo.alleLaden()
-        offeneBewegungen  = bewegungRepo.offene()
+        alleBewegungen    = bewegungRepo.alleLaden()
+        offeneBewegungen  = alleBewegungen.filter { $0.istOffen }
     }
 
     // MARK: - Lookup

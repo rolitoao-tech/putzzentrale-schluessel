@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SchluesselUebersichtView: View {
+struct KundenView: View {
     @EnvironmentObject var vm: AppViewModel
     @Binding var ausgewaehlterKunde: Kunde?
     @State private var suchtext = ""
@@ -24,7 +24,7 @@ struct SchluesselUebersichtView: View {
 
     var body: some View {
         kundenListe
-            .navigationTitle("Schlüssel-Übersicht")
+            .navigationTitle("Kunden")
             .toolbar {
                 ToolbarItem {
                     Toggle(isOn: $nurImUmlauf) {
