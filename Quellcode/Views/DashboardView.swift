@@ -25,7 +25,7 @@ struct DashboardView: View {
             }
             .padding(24)
         }
-        .navigationTitle("Dashboard")
+        .navigationTitle("Übersicht")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { zeigeNeueBewegung = true } label: {

@@ -7,11 +7,21 @@ class ErinnerungsService: ObservableObject {
     @Published var zugriffErteilt = false
 
     func zugriffAnfordern() async {
+        let aktuellerStatus = EKEventStore.authorizationStatus(for: .reminder)
+        print("[Erinnerungen] Aktueller Status: \(aktuellerStatus.rawValue)")
+
         if #available(macOS 14.0, *) {
-            zugriffErteilt = (try? await store.requestFullAccessToReminders()) ?? false
+            do {
+                zugriffErteilt = try await store.requestFullAccessToReminders()
+                print("[Erinnerungen] Zugriff erteilt: \(zugriffErteilt)")
+            } catch {
+                zugriffErteilt = false
+                print("[Erinnerungen] Fehler bei Zugriffsanfrage: \(error)")
+            }
         } else {
             zugriffErteilt = await withCheckedContinuation { cont in
-                store.requestAccess(to: .reminder) { granted, _ in
+                store.requestAccess(to: .reminder) { granted, fehler in
+                    if let fehler { print("[Erinnerungen] Fehler: \(fehler)") }
                     cont.resume(returning: granted)
                 }
             }

@@ -24,5 +24,7 @@
 	<string>NSApplication</string>
 	<key>NSRemindersUsageDescription</key>
 	<string>Putzzentrale erstellt Erinnerungen für Schlüssel-Rückgabetermine.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Wird vom System für den Zugriff auf Erinnerungen mitgenutzt.</string>
 </dict>
 </plist>

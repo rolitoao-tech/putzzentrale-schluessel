@@ -8,10 +8,13 @@ struct PutzentraleApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistence.viewContext)
+                .frame(minWidth: 900, minHeight: 520)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))
+        .windowResizability(.contentMinSize)
         .defaultSize(width: 1280, height: 780)
+        .defaultPosition(.center)
         .commands {
             CommandGroup(replacing: .newItem) { }
         }

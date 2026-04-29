@@ -2,9 +2,9 @@ import SwiftUI
 
 struct SchluesselUebersichtView: View {
     @EnvironmentObject var vm: AppViewModel
+    @Binding var ausgewaehlterKunde: Kunde?
     @State private var suchtext = ""
     @State private var nurImUmlauf = false
-    @State private var ausgewaehlterKunde: Kunde?
     @State private var zeigeNeuenKunden = false
 
     private var gefiltert: [Kunde] {
@@ -23,40 +23,37 @@ struct SchluesselUebersichtView: View {
     }
 
     var body: some View {
-        HSplitView {
-            linkeSeite.frame(minWidth: 320, idealWidth: 380, maxWidth: 480)
-            rechteSeite.frame(minWidth: 520)
-        }
-        .navigationTitle("Schlüssel-Übersicht")
-        .toolbar {
-            ToolbarItem {
-                Toggle(isOn: $nurImUmlauf) {
-                    Label("Im Umlauf", systemImage: "arrow.left.arrow.right")
+        kundenListe
+            .navigationTitle("Schlüssel-Übersicht")
+            .toolbar {
+                ToolbarItem {
+                    Toggle(isOn: $nurImUmlauf) {
+                        Label("Im Umlauf", systemImage: "arrow.left.arrow.right")
+                    }
+                    .toggleStyle(.button)
+                    .help("Nur Schlüssel anzeigen, die nicht bei der zugeteilten RK sind")
                 }
-                .toggleStyle(.button)
-                .help("Nur Schlüssel anzeigen, die nicht bei der zugeteilten RK sind")
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button { zeigeNeuenKunden = true } label: {
-                    Label("Neuer Kunde", systemImage: "plus")
+                ToolbarItem(placement: .primaryAction) {
+                    Button { zeigeNeuenKunden = true } label: {
+                        Label("Neuer Kunde", systemImage: "plus")
+                    }
                 }
             }
-        }
-        .sheet(isPresented: $zeigeNeuenKunden) {
-            KundeFormular(vorlage: nil) { k in
-                vm.kundeHinzufuegen(k)
-                zeigeNeuenKunden = false
+            .sheet(isPresented: $zeigeNeuenKunden) {
+                KundeFormular(vorlage: nil) { k in
+                    vm.kundeHinzufuegen(k)
+                    zeigeNeuenKunden = false
+                }
             }
-        }
-        .onReceive(vm.$kunden) { liste in
-            guard let sel = ausgewaehlterKunde else { return }
-            ausgewaehlterKunde = liste.first { $0.id == sel.id }
-        }
+            .onReceive(vm.$kunden) { liste in
+                guard let sel = ausgewaehlterKunde else { return }
+                ausgewaehlterKunde = liste.first { $0.id == sel.id }
+            }
     }
 
-    // MARK: - Linke Seite
+    // MARK: - Kundenliste
 
-    private var linkeSeite: some View {
+    private var kundenListe: some View {
         VStack(spacing: 0) {
             HStack {
                 Image(systemName: "magnifyingglass").foregroundColor(.secondary)
@@ -73,10 +70,11 @@ struct SchluesselUebersichtView: View {
             Divider()
 
             HStack(spacing: 0) {
-                Color.clear.frame(width: 18)
+                // Platz für Status-Punkt in den Zeilen (fix, nicht vertikal flexibel)
+                Spacer().frame(width: 18)
                 Text("Nr.").frame(width: 48, alignment: .leading)
-                Text("Name").frame(width: 140, alignment: .leading)
-                Text("Wohnort").frame(width: 80, alignment: .leading)
+                Text("Name").frame(minWidth: 80, alignment: .leading)
+                Text("Wohnort").frame(minWidth: 60, alignment: .leading)
                 Spacer(minLength: 4)
                 Text("Standort").frame(minWidth: 90, alignment: .trailing)
             }
@@ -102,23 +100,6 @@ struct SchluesselUebersichtView: View {
             .background(Color(.controlBackgroundColor))
         }
     }
-
-    // MARK: - Rechte Seite
-
-    @ViewBuilder
-    private var rechteSeite: some View {
-        if let k = ausgewaehlterKunde {
-            KundeDetailView(kunde: k, onAktualisiert: { ausgewaehlterKunde = $0 })
-                .id(k.id)  // erzwingt Neuaufbau bei Kundenwechsel
-        } else {
-            VStack(spacing: 8) {
-                Image(systemName: "key.fill")
-                    .font(.system(size: 40)).foregroundColor(.secondary.opacity(0.4))
-                Text("Kunde auswählen").foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-    }
 }
 
 // MARK: - Listenzeile
@@ -135,12 +116,14 @@ struct KundenZeile: View {
                 .font(.caption).foregroundColor(.secondary)
                 .frame(width: 48, alignment: .leading)
             Text(kunde.name).fontWeight(.medium)
-                .frame(width: 140, alignment: .leading)
+                .frame(minWidth: 80, alignment: .leading)
                 .lineLimit(1)
+                .truncationMode(.tail)
             Text(kunde.wohnort)
                 .font(.caption).foregroundColor(.secondary)
-                .frame(width: 80, alignment: .leading)
+                .frame(minWidth: 60, alignment: .leading)
                 .lineLimit(1)
+                .truncationMode(.tail)
             Spacer(minLength: 4)
             standortBadge
         }
@@ -286,11 +269,11 @@ struct KundeDetailView: View {
                 VStack(spacing: 1) {
                     HStack {
                         Text("Eingefordert").frame(width: 90, alignment: .leading)
-                        Text("War bei").frame(minWidth: 130, alignment: .leading)
+                        Text("War bei").frame(minWidth: 90, alignment: .leading)
                         Text("Grund").frame(width: 110, alignment: .leading)
                         Text("Erwartet").frame(width: 85, alignment: .leading)
                         Text("Zurück").frame(width: 85, alignment: .leading)
-                        Spacer()
+                        Spacer(minLength: 4)
                         Text("Status").frame(width: 85, alignment: .trailing)
                     }
                     .font(.caption).foregroundColor(.secondary)
@@ -486,7 +469,9 @@ struct HistorieZeile: View {
             Text(warBei)
                 .font(.caption)
                 .foregroundColor(bewegung.stellvertretungRKId != nil ? .orange : .secondary)
-                .frame(minWidth: 130, alignment: .leading)
+                .frame(minWidth: 90, alignment: .leading)
+                .lineLimit(1)
+                .truncationMode(.tail)
             Text(bewegung.grund.rawValue)
                 .font(.caption).frame(width: 110, alignment: .leading)
             Text(bewegung.erwarteteRueckgabe.map { $0.anzeigeText } ?? "–")

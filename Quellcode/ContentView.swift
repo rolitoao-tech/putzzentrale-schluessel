@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum Navigationsbereich: String, Hashable {
-    case dashboard        = "Dashboard"
+    case dashboard        = "Übersicht"
     case schluessel       = "Schlüssel-Übersicht"
     case reinigungskraefte = "Reinigungskräfte"
 }
@@ -9,23 +9,29 @@ enum Navigationsbereich: String, Hashable {
 struct ContentView: View {
     @StateObject private var vm = AppViewModel()
     @State private var bereich: Navigationsbereich? = .dashboard
+    @State private var ausgewaehlterKunde: Kunde?
+    @State private var ausgewaehlteRK: Reinigungskraft?
+    @State private var spaltenSichtbarkeit: NavigationSplitViewVisibility = .all
 
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
+        NavigationSplitView(columnVisibility: $spaltenSichtbarkeit) {
             seitenleiste
-                .navigationSplitViewColumnWidth(min: 190, ideal: 210)
+                .navigationSplitViewColumnWidth(min: 210, ideal: 210, max: 210)
+        } content: {
+            inhaltsSpalte
+                .navigationSplitViewColumnWidth(min: 260, ideal: 360, max: 480)
         } detail: {
-            NavigationStack {
-                detailAnsicht
-            }
+            detailSpalte
         }
         .environmentObject(vm)
     }
 
+    // MARK: - Seitenleiste
+
     private var seitenleiste: some View {
         List(selection: $bereich) {
             NavigationLink(value: Navigationsbereich.dashboard) {
-                Label("Dashboard", systemImage: "gauge.badge.plus")
+                Label("Übersicht", systemImage: "gauge.badge.plus")
             }
             NavigationLink(value: Navigationsbereich.schluessel) {
                 Label("Schlüssel-Übersicht", systemImage: "key.fill")
@@ -56,12 +62,55 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Inhalts-Spalte (Listen)
+
     @ViewBuilder
-    private var detailAnsicht: some View {
+    private var inhaltsSpalte: some View {
         switch bereich ?? .dashboard {
-        case .dashboard:          DashboardView()
-        case .schluessel:         SchluesselUebersichtView()
-        case .reinigungskraefte:  ReinigungskraefteView()
+        case .dashboard:
+            // Wird per spaltenSichtbarkeit ausgeblendet
+            Color.clear
+        case .schluessel:
+            SchluesselUebersichtView(ausgewaehlterKunde: $ausgewaehlterKunde)
+        case .reinigungskraefte:
+            ReinigungskraefteView(ausgewaehlt: $ausgewaehlteRK)
         }
+    }
+
+    // MARK: - Detail-Spalte
+
+    @ViewBuilder
+    private var detailSpalte: some View {
+        switch bereich ?? .dashboard {
+        case .dashboard:
+            DashboardView()
+
+        case .schluessel:
+            if let k = ausgewaehlterKunde {
+                KundeDetailView(kunde: k, onAktualisiert: { ausgewaehlterKunde = $0 })
+                    .id(k.id)  // erzwingt Neuaufbau bei Kundenwechsel
+            } else {
+                leerZustand(symbol: "key.fill", text: "Kunde auswählen")
+            }
+
+        case .reinigungskraefte:
+            if let r = ausgewaehlteRK {
+                ReinigungskraftDetail(rk: r, onAktualisiert: { ausgewaehlteRK = $0 })
+                    .id(r.id)
+            } else {
+                leerZustand(symbol: "person.2.fill", text: "Reinigungskraft auswählen")
+            }
+        }
+    }
+
+    // MARK: - Leerzustand
+
+    private func leerZustand(symbol: String, text: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: symbol)
+                .font(.system(size: 40)).foregroundColor(.secondary.opacity(0.4))
+            Text(text).foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -2,60 +2,27 @@ import SwiftUI
 
 struct ReinigungskraefteView: View {
     @EnvironmentObject var vm: AppViewModel
-    @State private var ausgewaehlt: Reinigungskraft?
-    @State private var zeigeFormular = false
-    @State private var bearbeitete: Reinigungskraft?
+    @Binding var ausgewaehlt: Reinigungskraft?
+    @State private var zeigeNeueForm = false
 
     var body: some View {
-        HSplitView {
-            linkeSeite.frame(minWidth: 240, idealWidth: 260)
-            rechteSeite
-        }
-        .navigationTitle("Reinigungskräfte")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    bearbeitete = nil
-                    zeigeFormular = true
-                } label: {
-                    Label("Neue Reinigungskraft", systemImage: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $zeigeFormular) {
-            ReinigungskraftFormular(vorlage: bearbeitete) { r in
-                if bearbeitete == nil {
-                    vm.rkHinzufuegen(r)
-                } else {
-                    vm.rkAktualisieren(r)
-                    ausgewaehlt = r
-                }
-                zeigeFormular = false
-            }
-        }
-    }
-
-    private var linkeSeite: some View {
         List(vm.reinigungskraefte, selection: $ausgewaehlt) { r in
             ReinigungskraftZeile(rk: r).tag(r)
         }
         .listStyle(.sidebar)
-    }
-
-    @ViewBuilder
-    private var rechteSeite: some View {
-        if let r = ausgewaehlt {
-            ReinigungskraftDetail(
-                rk: r,
-                onBearbeiten: { bearbeitete = r; zeigeFormular = true }
-            )
-        } else {
-            VStack(spacing: 8) {
-                Image(systemName: "person.2.fill")
-                    .font(.system(size: 40)).foregroundColor(.secondary.opacity(0.4))
-                Text("Reinigungskraft auswählen").foregroundColor(.secondary)
+        .navigationTitle("Reinigungskräfte")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { zeigeNeueForm = true } label: {
+                    Label("Neue Reinigungskraft", systemImage: "plus")
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .sheet(isPresented: $zeigeNeueForm) {
+            ReinigungskraftFormular(vorlage: nil) { r in
+                vm.rkHinzufuegen(r)
+                zeigeNeueForm = false
+            }
         }
     }
 }
@@ -99,10 +66,11 @@ struct ReinigungskraftZeile: View {
 struct ReinigungskraftDetail: View {
     @EnvironmentObject var vm: AppViewModel
     let rk: Reinigungskraft
-    let onBearbeiten: () -> Void
+    var onAktualisiert: ((Reinigungskraft) -> Void)? = nil
 
     @State private var zeigeAlleZurueck = false
     @State private var zeigeLoeschen = false
+    @State private var zeigeBearbeiten = false
 
     private var zugeteilteKunden: [Kunde] {
         vm.zugeteilteKunden(rkId: rk.id)
@@ -143,6 +111,13 @@ struct ReinigungskraftDetail: View {
         } message: {
             Text("Zugeteilte Kunden verlieren die Zuteilung. Bewegungen bleiben erhalten.")
         }
+        .sheet(isPresented: $zeigeBearbeiten) {
+            ReinigungskraftFormular(vorlage: rk) { r in
+                vm.rkAktualisieren(r)
+                onAktualisiert?(r)
+                zeigeBearbeiten = false
+            }
+        }
     }
 
     private var kopfbereich: some View {
@@ -168,7 +143,7 @@ struct ReinigungskraftDetail: View {
             }
             Spacer()
             HStack {
-                Button("Bearbeiten") { onBearbeiten() }.buttonStyle(.bordered)
+                Button("Bearbeiten") { zeigeBearbeiten = true }.buttonStyle(.bordered)
                 if !stellvertretungenOffen.isEmpty {
                     Button("Alle zurück") { zeigeAlleZurueck = true }
                         .buttonStyle(.bordered).foregroundColor(.orange)
