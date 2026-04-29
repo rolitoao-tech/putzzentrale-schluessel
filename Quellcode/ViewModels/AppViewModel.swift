@@ -179,4 +179,117 @@ class AppViewModel: ObservableObject {
         bewegungRepo.aktualisieren(b)
         ladeAlles()
     }
+
+    // MARK: - Demo-Daten (nur für Test/Entwicklung)
+
+    // Erzeugt 5 Reinigungskräfte und 20 Kunden mit gemischten Bewegungs-Zuständen.
+    // Idempotent über Namens-Check: bestehende Demo-Daten werden nicht doppelt angelegt.
+    func demoDatenErzeugen() {
+        let rkNamen = ["Marina", "Sandra", "Elif", "Fatima", "Lisa"]
+        var rkIds: [String: UUID] = [:]
+
+        // RKs anlegen, falls noch nicht vorhanden
+        for name in rkNamen {
+            if let bestehend = reinigungskraefte.first(where: { $0.name == name }) {
+                rkIds[name] = bestehend.id
+            } else {
+                var rk = Reinigungskraft()
+                rk.name = name
+                let neu = rkRepo.anlegen(rk)
+                rkIds[name] = neu.id
+            }
+        }
+
+        // Kunden mit Zuteilung
+        let demoKunden: [(nr: String, name: String, ort: String, rk: String)] = [
+            ("2001", "Müller, Hans",        "Zürich",       "Marina"),
+            ("2002", "Weber, Anna",         "Zürich",       "Marina"),
+            ("2003", "Schneider, Tom",      "Küsnacht",     "Marina"),
+            ("2004", "Keller, Sophie",      "Erlenbach",    "Marina"),
+            ("2005", "Bauer, Markus",       "Männedorf",    "Marina"),
+            ("2006", "Frei, Petra",         "Zürich",       "Sandra"),
+            ("2007", "Huber, Robert",       "Horgen",       "Sandra"),
+            ("2008", "Meier, Lisa",         "Wädenswil",    "Sandra"),
+            ("2009", "Wagner, Jan",         "Stäfa",        "Sandra"),
+            ("2010", "Roth, Claudia",       "Meilen",       "Elif"),
+            ("2011", "Schmid, David",       "Herrliberg",   "Elif"),
+            ("2012", "Brunner, Sabine",     "Zollikon",     "Elif"),
+            ("2013", "Steiner, Felix",      "Küsnacht",     "Elif"),
+            ("2014", "Frey, Nicole",        "Thalwil",      "Fatima"),
+            ("2015", "Lang, Patrick",       "Rüschlikon",   "Fatima"),
+            ("2016", "Gerber, Andrea",      "Kilchberg",    "Fatima"),
+            ("2017", "Kunz, Daniel",        "Zürich",       "Lisa"),
+            ("2018", "Walter, Eva",         "Zürich",       "Lisa"),
+            ("2019", "Iten, Stefan",        "Adliswil",     "Lisa"),
+            ("2020", "Hofer, Ursula",       "Langnau a.A.", "Lisa"),
+        ]
+
+        var kundenIds: [String: UUID] = [:]
+
+        for d in demoKunden {
+            if let bestehend = kunden.first(where: { $0.kundennummer == d.nr }) {
+                kundenIds[d.nr] = bestehend.id
+                continue
+            }
+            var k = Kunde()
+            k.kundennummer = d.nr
+            k.name = d.name
+            k.wohnort = d.ort
+            k.zugeteilteReinigungskraftId = rkIds[d.rk]
+            let neu = kundenRepo.anlegen(k)
+            kundenIds[d.nr] = neu.id
+        }
+
+        // Bewegungen mit verschiedenen Zuständen
+        // (Nr, Tage in Vergangenheit für Abgang, Tage erwartet zurück, Ablage, Stellv. RK)
+        struct DemoBewegung {
+            let kundenNr: String
+            let tageAbgang: Int  // negativ = in Vergangenheit
+            let tageErwartet: Int
+            let ablage: BueroAblage?
+            let stellvRK: String?
+        }
+
+        let demoBewegungen: [DemoBewegung] = [
+            // Marina – 1 unterwegs (Safe)
+            DemoBewegung(kundenNr: "2001", tageAbgang: -3, tageErwartet: 4, ablage: .safe, stellvRK: nil),
+            // Sandra – 2 unterwegs (1 Stellv bei Marina, 1 Dossier)
+            DemoBewegung(kundenNr: "2006", tageAbgang: -5, tageErwartet: 2, ablage: nil, stellvRK: "Marina"),
+            DemoBewegung(kundenNr: "2007", tageAbgang: -1, tageErwartet: 6, ablage: .dossier, stellvRK: nil),
+            // Elif – 1 überfällig (Safe)
+            DemoBewegung(kundenNr: "2010", tageAbgang: -10, tageErwartet: -2, ablage: .safe, stellvRK: nil),
+            // Fatima – 1 Stellv bei Lisa
+            DemoBewegung(kundenNr: "2014", tageAbgang: -2, tageErwartet: 5, ablage: nil, stellvRK: "Lisa"),
+            // Lisa – 0 unterwegs
+        ]
+
+        let kalender = Calendar.current
+        let heute = Date()
+
+        for d in demoBewegungen {
+            guard let kid = kundenIds[d.kundenNr] else { continue }
+            // Falls bereits eine offene Bewegung existiert, überspringen
+            if vm_aktiveBewegungVorhanden(kundenId: kid) { continue }
+
+            var b = Bewegung()
+            b.kundenId = kid
+            b.datumAbgang = kalender.date(byAdding: .day, value: d.tageAbgang, to: heute) ?? heute
+            b.grund = .einzelTermin
+            b.erwarteteRueckgabe = kalender.date(byAdding: .day, value: d.tageErwartet, to: heute)
+            if let stellv = d.stellvRK {
+                b.stellvertretungRKId = rkIds[stellv]
+            } else {
+                b.bueroAblage = d.ablage
+            }
+            b.erstelltVon = "Demo"
+            b.erstelltAm = heute
+            bewegungRepo.anlegen(b)
+        }
+
+        ladeAlles()
+    }
+
+    private func vm_aktiveBewegungVorhanden(kundenId: UUID) -> Bool {
+        bewegungRepo.aktiveFuerKunde(kundenId) != nil
+    }
 }

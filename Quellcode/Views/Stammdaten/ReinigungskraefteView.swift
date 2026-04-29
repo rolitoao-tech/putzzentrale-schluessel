@@ -1,21 +1,74 @@
 import SwiftUI
 
+// Fokus-Hinweis für die Detail-Ansicht: zu welcher Sektion soll gescrollt werden?
+enum RKFokus: String, Hashable {
+    case beiIhr         = "bei-ihr"
+    case unterwegs      = "unterwegs"
+    case stellvertretung = "stellvertretung"
+}
+
 struct ReinigungskraefteView: View {
     @EnvironmentObject var vm: AppViewModel
     @Binding var ausgewaehlt: Reinigungskraft?
+    var onZahlenklick: ((Reinigungskraft, RKFokus) -> Void)? = nil
     @State private var zeigeNeueForm = false
 
     var body: some View {
-        List(vm.reinigungskraefte, selection: $ausgewaehlt) { r in
-            ReinigungskraftZeile(rk: r).tag(r)
+        VStack(spacing: 0) {
+            // Header-Zeile
+            HStack(spacing: 0) {
+                Spacer().frame(width: 18)
+                Text("Name")
+                    .frame(minWidth: 80, alignment: .leading)
+                Spacer(minLength: 4)
+                Text("Bei ihr")
+                    .frame(width: 55, alignment: .trailing)
+                Text("Unterwegs")
+                    .frame(width: 75, alignment: .trailing)
+                Text("Stellv.")
+                    .frame(width: 55, alignment: .trailing)
+            }
+            .font(.caption).foregroundColor(.secondary)
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .background(Color.secondary.opacity(0.08))
+
+            Divider()
+
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(vm.reinigungskraefte) { r in
+                        Button {
+                            ausgewaehlt = r
+                        } label: {
+                            ReinigungskraftZeile(rk: r, onZahlenklick: { fokus in
+                                onZahlenklick?(r, fokus)
+                            })
+                            .background(ausgewaehlt?.id == r.id
+                                ? Color.accentColor.opacity(0.15)
+                                : Color(.controlBackgroundColor))
+                        }
+                        .buttonStyle(.plain)
+                        Divider().padding(.leading, 10)
+                    }
+                }
+            }
+            .background(Color(.controlBackgroundColor))
         }
-        .listStyle(.sidebar)
         .navigationTitle("Reinigungskräfte")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { zeigeNeueForm = true } label: {
                     Label("Neue Reinigungskraft", systemImage: "plus")
                 }
+            }
+            // Temporär: Demo-Daten für Entwicklung. Wird vor Auslieferung entfernt.
+            ToolbarItem {
+                Button {
+                    vm.demoDatenErzeugen()
+                } label: {
+                    Label("Demo-Daten", systemImage: "wand.and.stars")
+                }
+                .help("Erzeugt 5 RKs + 20 Demo-Kunden mit gemischten Bewegungen")
             }
         }
         .sheet(isPresented: $zeigeNeueForm) {
@@ -27,36 +80,77 @@ struct ReinigungskraefteView: View {
     }
 }
 
-// MARK: - Listenzeile
+// MARK: - Listenzeile mit Kennzahlen
 
 struct ReinigungskraftZeile: View {
     @EnvironmentObject var vm: AppViewModel
     let rk: Reinigungskraft
+    var onZahlenklick: ((RKFokus) -> Void)? = nil
 
-    private var anzahlZugeteilt: Int {
-        vm.zugeteilteKunden(rkId: rk.id).count
+    // Eigene Kunden ohne aktive Bewegung — Schlüssel ist normal bei ihr
+    private var anzahlBeiIhr: Int {
+        vm.zugeteilteKunden(rkId: rk.id).filter {
+            vm.aktiveBewegung(kundenId: $0.id) == nil
+        }.count
+    }
+
+    // Eigene Kunden mit aktiver Bewegung — Schlüssel ist gerade weg (Büro/Stellv./unterwegs)
+    private var anzahlUnterwegs: Int {
+        vm.zugeteilteKunden(rkId: rk.id).filter {
+            vm.aktiveBewegung(kundenId: $0.id) != nil
+        }.count
+    }
+
+    // Fremde Schlüssel die GERADE als Stellvertretung bei ihr liegen
+    private var anzahlStellvertretung: Int {
+        vm.bewegungen(fuerStellvertretung: rk.id, nurOffen: true).count
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             Circle()
                 .fill(rk.aktiv ? Color.green : Color.secondary)
                 .frame(width: 8, height: 8)
-            Text(rk.name).fontWeight(.medium)
-            Spacer()
-            if anzahlZugeteilt > 0 {
-                Text("\(anzahlZugeteilt)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 6).padding(.vertical, 2)
-                    .background(Color.secondary.opacity(0.15))
-                    .clipShape(Capsule())
+                .padding(.trailing, 10)
+
+            HStack(spacing: 6) {
+                Text(rk.name).fontWeight(.medium).lineLimit(1)
+                if !rk.aktiv {
+                    Text("Inaktiv").font(.caption2).foregroundColor(.secondary)
+                }
             }
-            if !rk.aktiv {
-                Text("Inaktiv").font(.caption2).foregroundColor(.secondary)
+            .frame(minWidth: 80, alignment: .leading)
+
+            Spacer(minLength: 4)
+
+            Button { onZahlenklick?(.beiIhr) } label: {
+                Text("\(anzahlBeiIhr)")
+                    .font(.callout)
+                    .foregroundColor(anzahlBeiIhr > 0 ? .primary : .secondary)
+                    .frame(width: 55, alignment: .trailing)
             }
+            .buttonStyle(.plain)
+            .help("Eigene Schlüssel die aktuell bei \(rk.name) sind")
+
+            Button { onZahlenklick?(.unterwegs) } label: {
+                Text("\(anzahlUnterwegs)")
+                    .font(.callout)
+                    .foregroundColor(anzahlUnterwegs > 0 ? .orange : .secondary)
+                    .frame(width: 75, alignment: .trailing)
+            }
+            .buttonStyle(.plain)
+            .help("Eigene Schlüssel die gerade unterwegs sind")
+
+            Button { onZahlenklick?(.stellvertretung) } label: {
+                Text("\(anzahlStellvertretung)")
+                    .font(.callout)
+                    .foregroundColor(anzahlStellvertretung > 0 ? .orange : .secondary)
+                    .frame(width: 55, alignment: .trailing)
+            }
+            .buttonStyle(.plain)
+            .help("Fremde Schlüssel die als Stellvertretung bei \(rk.name) liegen")
         }
-        .padding(.vertical, 2)
+        .padding(.horizontal, 10).padding(.vertical, 6)
         .opacity(rk.aktiv ? 1 : 0.6)
     }
 }
@@ -66,14 +160,24 @@ struct ReinigungskraftZeile: View {
 struct ReinigungskraftDetail: View {
     @EnvironmentObject var vm: AppViewModel
     let rk: Reinigungskraft
+    var initialFokus: RKFokus? = nil
     var onAktualisiert: ((Reinigungskraft) -> Void)? = nil
 
     @State private var zeigeAlleZurueck = false
     @State private var zeigeLoeschen = false
     @State private var zeigeBearbeiten = false
+    @State private var hervorgehoben: RKFokus?
 
     private var zugeteilteKunden: [Kunde] {
         vm.zugeteilteKunden(rkId: rk.id)
+    }
+
+    private var kundenBeiIhr: [Kunde] {
+        zugeteilteKunden.filter { vm.aktiveBewegung(kundenId: $0.id) == nil }
+    }
+
+    private var kundenUnterwegs: [Kunde] {
+        zugeteilteKunden.filter { vm.aktiveBewegung(kundenId: $0.id) != nil }
     }
 
     private var stellvertretungenOffen: [Bewegung] {
@@ -81,17 +185,30 @@ struct ReinigungskraftDetail: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                kopfbereich
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    kopfbereich
 
-                if !stellvertretungenOffen.isEmpty {
-                    stellvertretungsSektion
+                    stellvertretungsSektion.id(RKFokus.stellvertretung.rawValue)
+                    kundenUnterwegsSektion.id(RKFokus.unterwegs.rawValue)
+                    kundenBeiIhrSektion.id(RKFokus.beiIhr.rawValue)
                 }
-
-                zugeteilteKundenSektion
+                .padding(20)
             }
-            .padding(20)
+            .onAppear {
+                if let f = initialFokus {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        withAnimation { proxy.scrollTo(f.rawValue, anchor: .top) }
+                        flashHighlight(f)
+                    }
+                }
+            }
+            .onChange(of: initialFokus) { neu in
+                guard let f = neu else { return }
+                withAnimation { proxy.scrollTo(f.rawValue, anchor: .top) }
+                flashHighlight(f)
+            }
         }
         .confirmationDialog(
             "Alle Stellvertreter-Schlüssel von \(rk.name) zurück?",
@@ -116,6 +233,16 @@ struct ReinigungskraftDetail: View {
                 vm.rkAktualisieren(r)
                 onAktualisiert?(r)
                 zeigeBearbeiten = false
+            }
+        }
+    }
+
+    // Sektion-Titel kurz hervorheben (visuelles Feedback nach Drilldown)
+    private func flashHighlight(_ f: RKFokus) {
+        withAnimation(.easeIn(duration: 0.15)) { hervorgehoben = f }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            withAnimation(.easeOut(duration: 0.4)) {
+                if hervorgehoben == f { hervorgehoben = nil }
             }
         }
     }
@@ -161,7 +288,15 @@ struct ReinigungskraftDetail: View {
     private var stellvertretungsSektion: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Aktuell als Stellvertretung (\(stellvertretungenOffen.count))")
-                .font(.headline).foregroundColor(.orange)
+                .font(.headline)
+                .foregroundColor(stellvertretungenOffen.isEmpty ? .secondary : .orange)
+                .padding(.horizontal, 6).padding(.vertical, 2)
+                .background(hervorgehoben == .stellvertretung ? Color.orange.opacity(0.25) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            if stellvertretungenOffen.isEmpty {
+                Text("Keine fremden Schlüssel als Stellvertretung bei \(rk.name).")
+                    .font(.caption).foregroundColor(.secondary)
+            } else {
             VStack(spacing: 1) {
                 ForEach(stellvertretungenOffen) { b in
                     HStack {
@@ -193,54 +328,108 @@ struct ReinigungskraftDetail: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
         }
     }
 
-    private var zugeteilteKundenSektion: some View {
+    // Schlüssel die GERADE bei der RK sind (Normalzustand, keine offene Bewegung)
+    private var kundenBeiIhrSektion: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Zugeteilte Kunden (\(zugeteilteKunden.count))").font(.headline)
-            if zugeteilteKunden.isEmpty {
-                Text("Keine Kunden zugeteilt.").foregroundColor(.secondary)
+            Text("Schlüssel bei \(rk.name) (\(kundenBeiIhr.count))")
+                .font(.headline).foregroundColor(.green.opacity(0.9))
+                .padding(.horizontal, 6).padding(.vertical, 2)
+                .background(hervorgehoben == .beiIhr ? Color.green.opacity(0.25) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            if kundenBeiIhr.isEmpty {
+                Text("Keine Schlüssel aktuell bei \(rk.name).")
+                    .font(.caption).foregroundColor(.secondary)
             } else {
                 VStack(spacing: 1) {
                     HStack {
-                        Text("Nr.").frame(width: 50, alignment: .leading)
+                        Text("Nr.").frame(width: 60, alignment: .leading)
                         Text("Name").frame(minWidth: 150, alignment: .leading)
                         Text("Wohnort").frame(minWidth: 100, alignment: .leading)
                         Spacer()
-                        Text("Standort").frame(width: 120, alignment: .trailing)
                     }
                     .font(.caption).foregroundColor(.secondary)
                     .padding(.horizontal, 12).padding(.vertical, 5)
                     .background(Color.secondary.opacity(0.08))
 
-                    ForEach(zugeteilteKunden) { k in
+                    ForEach(kundenBeiIhr) { k in
                         HStack {
-                            // Status-Punkt
-                            Circle()
-                                .fill(vm.aktiveBewegung(kundenId: k.id) != nil ? Color.orange : Color.green)
-                                .frame(width: 7, height: 7)
+                            Circle().fill(Color.green).frame(width: 7, height: 7)
                             Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
                                 .frame(width: 50, alignment: .leading)
                             Text(k.name).frame(minWidth: 150, alignment: .leading)
                             Text(k.wohnort).font(.caption).foregroundColor(.secondary)
                                 .frame(minWidth: 100, alignment: .leading)
                             Spacer()
-                            if let b = vm.aktiveBewegung(kundenId: k.id) {
+                        }
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(Color(.controlBackgroundColor))
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+        }
+    }
+
+    // Schlüssel die aktuell unterwegs sind (Büro/Stellvertretung/in Bewegung)
+    private var kundenUnterwegsSektion: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Schlüssel unterwegs (\(kundenUnterwegs.count))")
+                .font(.headline).foregroundColor(kundenUnterwegs.isEmpty ? .secondary : .orange)
+                .padding(.horizontal, 6).padding(.vertical, 2)
+                .background(hervorgehoben == .unterwegs ? Color.orange.opacity(0.25) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+            if kundenUnterwegs.isEmpty {
+                Text("Alle Schlüssel sind bei \(rk.name).")
+                    .font(.caption).foregroundColor(.secondary)
+            } else {
+                VStack(spacing: 1) {
+                    HStack {
+                        Text("Nr.").frame(width: 60, alignment: .leading)
+                        Text("Name").frame(minWidth: 130, alignment: .leading)
+                        Text("Aktueller Standort").frame(minWidth: 130, alignment: .leading)
+                        Spacer()
+                        Text("Erwartet").frame(width: 90, alignment: .trailing)
+                        Text("Status").frame(width: 24, alignment: .trailing)
+                    }
+                    .font(.caption).foregroundColor(.secondary)
+                    .padding(.horizontal, 12).padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.08))
+
+                    ForEach(kundenUnterwegs) { k in
+                        if let b = vm.aktiveBewegung(kundenId: k.id) {
+                            HStack {
+                                Circle().fill(b.status.farbe).frame(width: 7, height: 7)
+                                Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
+                                    .frame(width: 50, alignment: .leading)
+                                Text(k.name).frame(minWidth: 130, alignment: .leading)
                                 let ort = b.stellvertretungRKId != nil
                                     ? "Bei \(vm.rkName(id: b.stellvertretungRKId!))"
                                     : b.aufenthaltsText
                                 Text(ort)
-                                    .font(.caption).foregroundColor(.orange)
-                                    .frame(width: 140, alignment: .trailing)
-                            } else {
-                                Text("Normalzustand")
-                                    .font(.caption).foregroundColor(.secondary)
-                                    .frame(width: 140, alignment: .trailing)
+                                    .font(.caption)
+                                    .foregroundColor(b.stellvertretungRKId != nil ? .orange : .secondary)
+                                    .frame(minWidth: 130, alignment: .leading)
+                                Spacer()
+                                if let er = b.erwarteteRueckgabe {
+                                    Text(er.anzeigeText)
+                                        .font(.caption)
+                                        .foregroundColor(b.status == .ueberfaellig ? .red : .secondary)
+                                        .frame(width: 90, alignment: .trailing)
+                                } else {
+                                    Text("–").font(.caption).foregroundColor(.secondary)
+                                        .frame(width: 90, alignment: .trailing)
+                                }
+                                Image(systemName: b.status.icon)
+                                    .foregroundColor(b.status.farbe).font(.caption)
+                                    .frame(width: 24, alignment: .trailing)
                             }
+                            .padding(.horizontal, 12).padding(.vertical, 7)
+                            .background(Color(.controlBackgroundColor))
                         }
-                        .padding(.horizontal, 12).padding(.vertical, 7)
-                        .background(Color(.controlBackgroundColor))
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))

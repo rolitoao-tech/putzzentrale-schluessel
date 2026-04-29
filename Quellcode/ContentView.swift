@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var ausgewaehlterKunde: Kunde?
     @State private var ausgewaehlteRK: Reinigungskraft?
     @State private var ausgewaehlteBewegung: Bewegung?
+    @State private var rkFokus: RKFokus?
     @State private var spaltenSichtbarkeit: NavigationSplitViewVisibility = .all
 
     var body: some View {
@@ -88,7 +89,10 @@ struct ContentView: View {
         case .kunden:
             KundenView(ausgewaehlterKunde: $ausgewaehlterKunde)
         case .reinigungskraefte:
-            ReinigungskraefteView(ausgewaehlt: $ausgewaehlteRK)
+            ReinigungskraefteView(ausgewaehlt: $ausgewaehlteRK, onZahlenklick: { rk, fokus in
+                ausgewaehlteRK = rk
+                rkFokus = fokus
+            })
         }
     }
 
@@ -128,8 +132,12 @@ struct ContentView: View {
 
         case .reinigungskraefte:
             if let r = ausgewaehlteRK {
-                ReinigungskraftDetail(rk: r, onAktualisiert: { ausgewaehlteRK = $0 })
-                    .id(r.id)
+                ReinigungskraftDetail(
+                    rk: r,
+                    initialFokus: rkFokus,
+                    onAktualisiert: { ausgewaehlteRK = $0 }
+                )
+                .id(r.id)
             } else {
                 leerZustand(symbol: "person.2.fill", text: "Reinigungskraft auswählen")
             }
