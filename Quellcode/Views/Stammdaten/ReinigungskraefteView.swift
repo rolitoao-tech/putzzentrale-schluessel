@@ -24,7 +24,7 @@ struct ReinigungskraefteView: View {
         }
         .sheet(isPresented: $zeigeFormular) {
             ReinigungskraftFormular(vorlage: bearbeitete) { r in
-                if r.id == 0 {
+                if bearbeitete == nil {
                     vm.rkHinzufuegen(r)
                 } else {
                     vm.rkAktualisieren(r)

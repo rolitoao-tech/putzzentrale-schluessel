@@ -7,164 +7,193 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0B719B1905A944CC817B8CDF /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F612C9DAFCAB4146B4A1F4B0 /* EventKit.framework */; };
-		8A4C4E5A6BE241A9BBAB7A1E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CCFCFF84E4084AC3ADEC0D3A /* Assets.xcassets */; };
-		5D868BE3CDA34EA2A8831B9C /* PutzentraleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0397A4C601A74D76B48411D7 /* PutzentraleApp.swift */; };
-		F34BED43AC8E49398624931B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA13039D53D44961B180A389 /* ContentView.swift */; };
-		BAF36997F8FA4B76831CAD03 /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = A45C318B86C742CAB52A1AA5 /* DateFormatters.swift */; };
-		3AAE43E9846D4048B1725E17 /* Kunde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5B2CF42E274509A035759D /* Kunde.swift */; };
-		CFAF82163AFB41ACBC4B299E /* Reinigungskraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3DF2B4F3F6416A80663256 /* Reinigungskraft.swift */; };
-		C466A1928E9F4BD6A97B33EF /* Bewegung.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83290B3D6FD442DDAE703923 /* Bewegung.swift */; };
-		F4B53133CFE740AA9CD00B36 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A77B6CC1DD345D681E7FA13 /* DatabaseManager.swift */; };
-		EC02305E598843E68B4DD7E8 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FB7BD2AC8214D31A09390BA /* AppViewModel.swift */; };
-		0C1CE37226554AA5AD63D573 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14793A72CC8E4F13939F9C3B /* DashboardView.swift */; };
-		9463B9A2537D4E03B254C137 /* SchluesselUebersichtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE26B96CB02425DBC521CA1 /* SchluesselUebersichtView.swift */; };
-		BF0679B060EE41E2B66F61EA /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1140CDF018AA47F788CFAEB3 /* BewegungErfassenView.swift */; };
-		22B46E30CB7048C5B4BD3EBC /* EinstellungenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FB2357FD7344C438B6390FD /* EinstellungenView.swift */; };
-		92EBFBC32C3249FBA203C8E3 /* ReinigungskraefteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9D8A5E39D24A30B79F6250 /* ReinigungskraefteView.swift */; };
-		13D6C3DBE48A42B3AE7F51CE /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A889611F9A410ABB885BEA /* ErinnerungsService.swift */; };
+		BDECE53BEE7241ACB9323A1F /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CC0C4E028EB4BF3B237B082 /* EventKit.framework */; };
+		9CF96A34EEDB4862924E8835 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ACF314427C842F4B41D84D0 /* CoreData.framework */; };
+		E37078C5F2B14F099029DB93 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A63F001805CD427E9AAA3B2C /* CloudKit.framework */; };
+		A002AA7E2BF54BA39B391833 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6FD083D671084ABF89ABF330 /* Assets.xcassets */; };
+		F3D4380753E746CEB6189A64 /* Schluesselverwaltung.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 6B3F63DB8B2C43AAAF26C538 /* Schluesselverwaltung.xcdatamodeld */; };
+		9E8E4DACAD4F411BAE69F562 /* PutzentraleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B2B1B686D84A669FDEB760 /* PutzentraleApp.swift */; };
+		AF0A615810AE4683BD871654 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E1F47CE8084572AF3F85A9 /* ContentView.swift */; };
+		FE335A2F317F44719463D45D /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE7FE67BDD44344887F4C1A /* DateFormatters.swift */; };
+		8C7D9155B88349A687B67B71 /* Kunde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784B4C03D6634CC2A6DB0463 /* Kunde.swift */; };
+		37198168C59845E8852CE2BE /* Reinigungskraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F859D6EB5F14DBF8584A5BD /* Reinigungskraft.swift */; };
+		205747126303451C922E06B0 /* Bewegung.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873DDD0E5C6F455B8166F6FB /* Bewegung.swift */; };
+		7D16FC4AF6B24C4AA1080F69 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4C86DAE36B41B79FBA9460 /* PersistenceController.swift */; };
+		7D73B2113EB24E9CA56556BB /* KundenRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FAC5485E6BE42EF87A2A0F3 /* KundenRepository.swift */; };
+		C60871A278CD449895419640 /* ReinigungskraftRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68CBBF929BBC46EB8D2EFBFD /* ReinigungskraftRepository.swift */; };
+		AACB4242A3BD482A89FFFBBF /* BewegungRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BD530CE46EE4A36AAF21241 /* BewegungRepository.swift */; };
+		A51022FD74564DA782763A3D /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFD5201D63F4FECA0EC6640 /* AppViewModel.swift */; };
+		CF6893877C1F4A6BBCD8F572 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC3BB0199D54B35B5598B28 /* DashboardView.swift */; };
+		20A2152D358547A18BE3A8A5 /* SchluesselUebersichtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F183D70F22F48108F25AA75 /* SchluesselUebersichtView.swift */; };
+		BB1513DF11E140D8957E915B /* BewegungErfassenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED25BB5B52B4857A23B5205 /* BewegungErfassenView.swift */; };
+		405B85C0E4CF418C9D5B9086 /* EinstellungenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E376AD2D3B164700A464D959 /* EinstellungenView.swift */; };
+		5C94561C3CE34B74B0AD607A /* ReinigungskraefteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3174252E33224AA9B91AD8C6 /* ReinigungskraefteView.swift */; };
+		505952D2EBF444C5B8E0FFC8 /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C932E0CAD4EB1B161E03E /* ErinnerungsService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		72DFF5FD2F9646FD9EB8A2BE /* Schlüsselverwaltung.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Schlüsselverwaltung.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F612C9DAFCAB4146B4A1F4B0 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
-		CCFCFF84E4084AC3ADEC0D3A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		0FEAA61A472D4BF691FA4801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		74256B7899DB43C8B0EDB5F3 /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
-		0397A4C601A74D76B48411D7 /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
-		DA13039D53D44961B180A389 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A45C318B86C742CAB52A1AA5 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
-		3C5B2CF42E274509A035759D /* Kunde.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kunde.swift; sourceTree = "<group>"; };
-		1C3DF2B4F3F6416A80663256 /* Reinigungskraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reinigungskraft.swift; sourceTree = "<group>"; };
-		83290B3D6FD442DDAE703923 /* Bewegung.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bewegung.swift; sourceTree = "<group>"; };
-		7A77B6CC1DD345D681E7FA13 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
-		6FB7BD2AC8214D31A09390BA /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
-		14793A72CC8E4F13939F9C3B /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		3BE26B96CB02425DBC521CA1 /* SchluesselUebersichtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselUebersichtView.swift; sourceTree = "<group>"; };
-		1140CDF018AA47F788CFAEB3 /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
-		0FB2357FD7344C438B6390FD /* EinstellungenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EinstellungenView.swift; sourceTree = "<group>"; };
-		DD9D8A5E39D24A30B79F6250 /* ReinigungskraefteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraefteView.swift; sourceTree = "<group>"; };
-		87A889611F9A410ABB885BEA /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
+		B9DF75F21B2D46C196664DBF /* Schlüsselverwaltung.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Schlüsselverwaltung.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4CC0C4E028EB4BF3B237B082 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		1ACF314427C842F4B41D84D0 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		A63F001805CD427E9AAA3B2C /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		6FD083D671084ABF89ABF330 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7D19ADB8F39B4A14B58FB928 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AF995D7DD3D54E6B86A55FF1 /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
+		6C2738F5C0D3487C86411D9D /* Schluesselverwaltung.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Schluesselverwaltung.xcdatamodel; sourceTree = "<group>"; };
+		77B2B1B686D84A669FDEB760 /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
+		99E1F47CE8084572AF3F85A9 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5EE7FE67BDD44344887F4C1A /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
+		784B4C03D6634CC2A6DB0463 /* Kunde.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kunde.swift; sourceTree = "<group>"; };
+		5F859D6EB5F14DBF8584A5BD /* Reinigungskraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reinigungskraft.swift; sourceTree = "<group>"; };
+		873DDD0E5C6F455B8166F6FB /* Bewegung.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bewegung.swift; sourceTree = "<group>"; };
+		AB4C86DAE36B41B79FBA9460 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		2FAC5485E6BE42EF87A2A0F3 /* KundenRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KundenRepository.swift; sourceTree = "<group>"; };
+		68CBBF929BBC46EB8D2EFBFD /* ReinigungskraftRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraftRepository.swift; sourceTree = "<group>"; };
+		4BD530CE46EE4A36AAF21241 /* BewegungRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungRepository.swift; sourceTree = "<group>"; };
+		7AFD5201D63F4FECA0EC6640 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		8CC3BB0199D54B35B5598B28 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		4F183D70F22F48108F25AA75 /* SchluesselUebersichtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchluesselUebersichtView.swift; sourceTree = "<group>"; };
+		8ED25BB5B52B4857A23B5205 /* BewegungErfassenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BewegungErfassenView.swift; sourceTree = "<group>"; };
+		E376AD2D3B164700A464D959 /* EinstellungenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EinstellungenView.swift; sourceTree = "<group>"; };
+		3174252E33224AA9B91AD8C6 /* ReinigungskraefteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraefteView.swift; sourceTree = "<group>"; };
+		7F2C932E0CAD4EB1B161E03E /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F848504323D74C4AA9858DF7 /* Frameworks */ = {
+		B8269EB402EB44FF8F4AE96C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647;
 			files = (
-				0B719B1905A944CC817B8CDF /* EventKit.framework in Frameworks */,
+				BDECE53BEE7241ACB9323A1F /* EventKit.framework in Frameworks */,
+				9CF96A34EEDB4862924E8835 /* CoreData.framework in Frameworks */,
+				E37078C5F2B14F099029DB93 /* CloudKit.framework in Frameworks */,
 			); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9E16A24F47A94C45AFC188E1 /*  */ = {
+		EEBDFE5CD1BC49ABA0D7E58B /*  */ = {
 			isa = PBXGroup;
 			children = (
-				79F8CEA0B8864FB68194EDA3 /* Quellcode */,
-				510829354BBF41289950C1B9 /* Frameworks */,
-				5641F112D751404884A9472C /* Products */,
+				5209265A1237468295267640 /* Quellcode */,
+				348A11ADBE5B4D67AB6B059E /* Frameworks */,
+				8F85774ACE4F4E3D90BD4E0C /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		5641F112D751404884A9472C /* Products */ = {
+		8F85774ACE4F4E3D90BD4E0C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				72DFF5FD2F9646FD9EB8A2BE /* Schlüsselverwaltung.app */,
+				B9DF75F21B2D46C196664DBF /* Schlüsselverwaltung.app */,
 			);
 			name = "Products";
 			sourceTree = "<group>";
 		};
-		510829354BBF41289950C1B9 /* Frameworks */ = {
+		348A11ADBE5B4D67AB6B059E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F612C9DAFCAB4146B4A1F4B0 /* EventKit.framework */,
+				4CC0C4E028EB4BF3B237B082 /* EventKit.framework */,
+				1ACF314427C842F4B41D84D0 /* CoreData.framework */,
+				A63F001805CD427E9AAA3B2C /* CloudKit.framework */,
 			);
 			name = "Frameworks";
 			sourceTree = "<group>";
 		};
-		79F8CEA0B8864FB68194EDA3 /* Quellcode */ = {
+		5209265A1237468295267640 /* Quellcode */ = {
 			isa = PBXGroup;
 			children = (
-				0397A4C601A74D76B48411D7 /* PutzentraleApp.swift */,
-				DA13039D53D44961B180A389 /* ContentView.swift */,
-				D46E1AD7EEBE4B2C851744C0 /* Models */,
-				5801263731CF4F62BB047DB8 /* Utilities */,
-				0D7A77BE8DC149AF8F266770 /* Database */,
-				EA58FFFE38114E6A8CB229E5 /* ViewModels */,
-				B7492056B3834ED49C3254E1 /* Views */,
-				C14B95AABC1842219D1F6741 /* Services */,
-				CCFCFF84E4084AC3ADEC0D3A /* Assets.xcassets */,
-				0FEAA61A472D4BF691FA4801 /* Info.plist */,
-				74256B7899DB43C8B0EDB5F3 /* Schlüsselverwaltung.entitlements */,
+				77B2B1B686D84A669FDEB760 /* PutzentraleApp.swift */,
+				99E1F47CE8084572AF3F85A9 /* ContentView.swift */,
+				BFBBD7B6CEE141B8B9F78BBB /* Models */,
+				66DFC6EE40214B32B07B98EE /* Utilities */,
+				482ADAEA72C0440DB49819CA /* Persistence */,
+				ABC1C80A709C499EBC19242B /* Repositories */,
+				7A84825F19D946EE8B64C819 /* ViewModels */,
+				65052E7F718E4A9399005FF5 /* Views */,
+				2C749D32BE424867A3CC2E5F /* Services */,
+				6FD083D671084ABF89ABF330 /* Assets.xcassets */,
+				7D19ADB8F39B4A14B58FB928 /* Info.plist */,
+				AF995D7DD3D54E6B86A55FF1 /* Schlüsselverwaltung.entitlements */,
 			);
 			name = "Quellcode";
 			path = "Quellcode";
 			sourceTree = "<group>";
 		};
-		D46E1AD7EEBE4B2C851744C0 /* Models */ = {
+		BFBBD7B6CEE141B8B9F78BBB /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				3C5B2CF42E274509A035759D /* Kunde.swift */,
-				1C3DF2B4F3F6416A80663256 /* Reinigungskraft.swift */,
-				83290B3D6FD442DDAE703923 /* Bewegung.swift */,
+				784B4C03D6634CC2A6DB0463 /* Kunde.swift */,
+				5F859D6EB5F14DBF8584A5BD /* Reinigungskraft.swift */,
+				873DDD0E5C6F455B8166F6FB /* Bewegung.swift */,
 			);
 			name = "Models";
 			path = "Models";
 			sourceTree = "<group>";
 		};
-		5801263731CF4F62BB047DB8 /* Utilities */ = {
+		66DFC6EE40214B32B07B98EE /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				A45C318B86C742CAB52A1AA5 /* DateFormatters.swift */,
+				5EE7FE67BDD44344887F4C1A /* DateFormatters.swift */,
 			);
 			name = "Utilities";
 			path = "Utilities";
 			sourceTree = "<group>";
 		};
-		0D7A77BE8DC149AF8F266770 /* Database */ = {
+		482ADAEA72C0440DB49819CA /* Persistence */ = {
 			isa = PBXGroup;
 			children = (
-				7A77B6CC1DD345D681E7FA13 /* DatabaseManager.swift */,
+				AB4C86DAE36B41B79FBA9460 /* PersistenceController.swift */,
+				6B3F63DB8B2C43AAAF26C538 /* Schluesselverwaltung.xcdatamodeld */,
 			);
-			name = "Database";
-			path = "Database";
+			name = "Persistence";
+			path = "Persistence";
 			sourceTree = "<group>";
 		};
-		EA58FFFE38114E6A8CB229E5 /* ViewModels */ = {
+		ABC1C80A709C499EBC19242B /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
-				6FB7BD2AC8214D31A09390BA /* AppViewModel.swift */,
+				2FAC5485E6BE42EF87A2A0F3 /* KundenRepository.swift */,
+				68CBBF929BBC46EB8D2EFBFD /* ReinigungskraftRepository.swift */,
+				4BD530CE46EE4A36AAF21241 /* BewegungRepository.swift */,
+			);
+			name = "Repositories";
+			path = "Repositories";
+			sourceTree = "<group>";
+		};
+		7A84825F19D946EE8B64C819 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				7AFD5201D63F4FECA0EC6640 /* AppViewModel.swift */,
 			);
 			name = "ViewModels";
 			path = "ViewModels";
 			sourceTree = "<group>";
 		};
-		B7492056B3834ED49C3254E1 /* Views */ = {
+		65052E7F718E4A9399005FF5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				14793A72CC8E4F13939F9C3B /* DashboardView.swift */,
-				3BE26B96CB02425DBC521CA1 /* SchluesselUebersichtView.swift */,
-				1140CDF018AA47F788CFAEB3 /* BewegungErfassenView.swift */,
-				0FB2357FD7344C438B6390FD /* EinstellungenView.swift */,
-				6D7150E10FE4482EA9981742 /* Stammdaten */,
+				8CC3BB0199D54B35B5598B28 /* DashboardView.swift */,
+				4F183D70F22F48108F25AA75 /* SchluesselUebersichtView.swift */,
+				8ED25BB5B52B4857A23B5205 /* BewegungErfassenView.swift */,
+				E376AD2D3B164700A464D959 /* EinstellungenView.swift */,
+				C1320F83ED5345F3A944CDDF /* Stammdaten */,
 			);
 			name = "Views";
 			path = "Views";
 			sourceTree = "<group>";
 		};
-		6D7150E10FE4482EA9981742 /* Stammdaten */ = {
+		C1320F83ED5345F3A944CDDF /* Stammdaten */ = {
 			isa = PBXGroup;
 			children = (
-				DD9D8A5E39D24A30B79F6250 /* ReinigungskraefteView.swift */,
+				3174252E33224AA9B91AD8C6 /* ReinigungskraefteView.swift */,
 			);
 			name = "Stammdaten";
 			path = "Stammdaten";
 			sourceTree = "<group>";
 		};
-		C14B95AABC1842219D1F6741 /* Services */ = {
+		2C749D32BE424867A3CC2E5F /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				87A889611F9A410ABB885BEA /* ErinnerungsService.swift */,
+				7F2C932E0CAD4EB1B161E03E /* ErinnerungsService.swift */,
 			);
 			name = "Services";
 			path = "Services";
@@ -172,62 +201,79 @@
 		};
 /* End PBXGroup section */
 
+/* Begin XCVersionGroup section */
+		6B3F63DB8B2C43AAAF26C538 /* Schluesselverwaltung.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				6C2738F5C0D3487C86411D9D /* Schluesselverwaltung.xcdatamodel */,
+			);
+			currentVersion = 6C2738F5C0D3487C86411D9D /* Schluesselverwaltung.xcdatamodel */;
+			path = Schluesselverwaltung.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+
 /* Begin PBXNativeTarget section */
-		F5FBC337922E4D50B90D9049 /* Schlüsselverwaltung */ = {
+		5BC3486F1E7C427DB5C499A9 /* Schlüsselverwaltung */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9CCCA8ED4D064D0DA0B3ACEE /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */;
-			buildPhases = (8579C0906E8440FCA1006D58 /* Sources */, F848504323D74C4AA9858DF7 /* Frameworks */, 159D1A5A8F32483990084305 /* Resources */,);
+			buildConfigurationList = 240408D0A93549F5B56A6B4F /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */;
+			buildPhases = (463F39E888A044A2B287218D /* Sources */, B8269EB402EB44FF8F4AE96C /* Frameworks */, 9BD49E22C6EA4F738E17EA23 /* Resources */,);
 			buildRules = (); dependencies = ();
 			name = "Schlüsselverwaltung"; productName = "Schlüsselverwaltung";
-			productReference = 72DFF5FD2F9646FD9EB8A2BE /* Schlüsselverwaltung.app */;
+			productReference = B9DF75F21B2D46C196664DBF /* Schlüsselverwaltung.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		97B81491CE0A4B08973D6066 /* Project object */ = {
+		36046670ED0240FB9C63C468 /* Project object */ = {
 			isa = PBXProject;
-			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; TargetAttributes = { F5FBC337922E4D50B90D9049 = { CreatedOnToolsVersion = 16.0; }; }; };
-			buildConfigurationList = 2666C44B238049129FDFAB2B /* Build configuration list for PBXProject "Schlüsselverwaltung" */;
+			attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 1600; TargetAttributes = { 5BC3486F1E7C427DB5C499A9 = { CreatedOnToolsVersion = 16.0; }; }; };
+			buildConfigurationList = F9466A7EB1D94889B97BC709 /* Build configuration list for PBXProject "Schlüsselverwaltung" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (de, Base,);
-			mainGroup = 9E16A24F47A94C45AFC188E1;
-			productRefGroup = 5641F112D751404884A9472C /* Products */;
+			mainGroup = EEBDFE5CD1BC49ABA0D7E58B;
+			productRefGroup = 8F85774ACE4F4E3D90BD4E0C /* Products */;
 			projectDirPath = ""; projectRoot = "";
-			targets = (F5FBC337922E4D50B90D9049 /* Schlüsselverwaltung */,);
+			targets = (5BC3486F1E7C427DB5C499A9 /* Schlüsselverwaltung */,);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		159D1A5A8F32483990084305 /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (8A4C4E5A6BE241A9BBAB7A1E /* Assets.xcassets in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		9BD49E22C6EA4F738E17EA23 /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A002AA7E2BF54BA39B391833 /* Assets.xcassets in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8579C0906E8440FCA1006D58 /* Sources */ = {
+		463F39E888A044A2B287218D /* Sources */ = {
 			isa = PBXSourcesBuildPhase; buildActionMask = 2147483647;
 			files = (
-				5D868BE3CDA34EA2A8831B9C /* PutzentraleApp.swift in Sources */,
-				F34BED43AC8E49398624931B /* ContentView.swift in Sources */,
-				BAF36997F8FA4B76831CAD03 /* DateFormatters.swift in Sources */,
-				3AAE43E9846D4048B1725E17 /* Kunde.swift in Sources */,
-				CFAF82163AFB41ACBC4B299E /* Reinigungskraft.swift in Sources */,
-				C466A1928E9F4BD6A97B33EF /* Bewegung.swift in Sources */,
-				F4B53133CFE740AA9CD00B36 /* DatabaseManager.swift in Sources */,
-				EC02305E598843E68B4DD7E8 /* AppViewModel.swift in Sources */,
-				0C1CE37226554AA5AD63D573 /* DashboardView.swift in Sources */,
-				9463B9A2537D4E03B254C137 /* SchluesselUebersichtView.swift in Sources */,
-				BF0679B060EE41E2B66F61EA /* BewegungErfassenView.swift in Sources */,
-				22B46E30CB7048C5B4BD3EBC /* EinstellungenView.swift in Sources */,
-				92EBFBC32C3249FBA203C8E3 /* ReinigungskraefteView.swift in Sources */,
-				13D6C3DBE48A42B3AE7F51CE /* ErinnerungsService.swift in Sources */,
+				F3D4380753E746CEB6189A64 /* Schluesselverwaltung.xcdatamodeld in Sources */,
+				9E8E4DACAD4F411BAE69F562 /* PutzentraleApp.swift in Sources */,
+				AF0A615810AE4683BD871654 /* ContentView.swift in Sources */,
+				FE335A2F317F44719463D45D /* DateFormatters.swift in Sources */,
+				8C7D9155B88349A687B67B71 /* Kunde.swift in Sources */,
+				37198168C59845E8852CE2BE /* Reinigungskraft.swift in Sources */,
+				205747126303451C922E06B0 /* Bewegung.swift in Sources */,
+				7D16FC4AF6B24C4AA1080F69 /* PersistenceController.swift in Sources */,
+				7D73B2113EB24E9CA56556BB /* KundenRepository.swift in Sources */,
+				C60871A278CD449895419640 /* ReinigungskraftRepository.swift in Sources */,
+				AACB4242A3BD482A89FFFBBF /* BewegungRepository.swift in Sources */,
+				A51022FD74564DA782763A3D /* AppViewModel.swift in Sources */,
+				CF6893877C1F4A6BBCD8F572 /* DashboardView.swift in Sources */,
+				20A2152D358547A18BE3A8A5 /* SchluesselUebersichtView.swift in Sources */,
+				BB1513DF11E140D8957E915B /* BewegungErfassenView.swift in Sources */,
+				405B85C0E4CF418C9D5B9086 /* EinstellungenView.swift in Sources */,
+				5C94561C3CE34B74B0AD607A /* ReinigungskraefteView.swift in Sources */,
+				505952D2EBF444C5B8E0FFC8 /* ErinnerungsService.swift in Sources */,
 			); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		AE00D51189164F1481366304 /* Debug */ = {
+		C982063C668A4B63829772C2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -236,7 +282,7 @@
 			};
 			name = Debug;
 		};
-		FD72C7E1EBA24F5A8429A49C /* Release */ = {
+		34E504E7C0134726BF4BB67E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -245,7 +291,7 @@
 			};
 			name = Release;
 		};
-		85AD02B1E6D4424B8CDEA22B /* Debug */ = {
+		2FAD1A5F369540F58C30ED21 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -253,18 +299,20 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "Quellcode/Schlüsselverwaltung.entitlements";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9UUZ8K43EJ;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Quellcode/Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "ch.putzzentrale.schluessel";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.pzschluessel";
 				PRODUCT_NAME = "Schlüsselverwaltung";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
+				ENABLE_HARDENED_RUNTIME = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 			};
 			name = Debug;
 		};
-		35DBCEBA3CEF4C9E9531F709 /* Release */ = {
+		17BBC537FBEB4BBAA934E102 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
@@ -272,22 +320,24 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "Quellcode/Schlüsselverwaltung.entitlements";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9UUZ8K43EJ;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Quellcode/Info.plist";
-				PRODUCT_BUNDLE_IDENTIFIER = "ch.putzzentrale.schluessel";
+				PRODUCT_BUNDLE_IDENTIFIER = "ch.pzschluessel";
 				PRODUCT_NAME = "Schlüsselverwaltung";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
+				ENABLE_HARDENED_RUNTIME = YES;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2666C44B238049129FDFAB2B /* Build configuration list for PBXProject "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (AE00D51189164F1481366304 /* Debug */, FD72C7E1EBA24F5A8429A49C /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		9CCCA8ED4D064D0DA0B3ACEE /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (85AD02B1E6D4424B8CDEA22B /* Debug */, 35DBCEBA3CEF4C9E9531F709 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F9466A7EB1D94889B97BC709 /* Build configuration list for PBXProject "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (C982063C668A4B63829772C2 /* Debug */, 34E504E7C0134726BF4BB67E /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		240408D0A93549F5B56A6B4F /* Build configuration list for PBXNativeTarget "Schlüsselverwaltung" */ = { isa = XCConfigurationList; buildConfigurations = (2FAD1A5F369540F58C30ED21 /* Debug */, 17BBC537FBEB4BBAA934E102 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 	};
-	rootObject = 97B81491CE0A4B08973D6066 /* Project object */;
+	rootObject = 36046670ED0240FB9C63C468 /* Project object */;
 }

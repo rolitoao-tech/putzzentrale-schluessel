@@ -22,20 +22,22 @@
 ## Technologie
 
 - Swift / SwiftUI, nativ macOS (kein iOS, kein iPadOS).
-- Datenbank: SQLite3 (direkt, kein ORM, kein SPM-Paket).
-- Keine CloudKit-Sync, kein iCloud.
-- EventKit für macOS-Erinnerungen.
+- Datenhaltung: **Core Data + CloudKit** über `NSPersistentCloudKitContainer`.
+- Bundle-ID: `ch.pzschluessel` · CloudKit-Container: `iCloud.ch.pzschluessel` (Team `9UUZ8K43EJ`).
+- Mehrbenutzer-Zugriff über CloudKit Sharing (CKShare) — siehe `ARCHITEKTUR_CLOUDKIT.md`.
+- App-Sandbox aktiviert (Voraussetzung für CloudKit).
+- **Keine** SQLite-Datei in iCloud Drive – das wäre für mehrere parallele Schreibzugriffe nicht robust.
+- EventKit für macOS-Erinnerungen (lokal pro Benutzer, kein Sync).
 
 ## Datenmodell (Überblick)
 
-| Entität    | Kernfelder |
-|------------|-----------|
-| Kunde      | name, adresse, objekt, status (aktiv/inaktiv) |
-| Putzfrau   | name, telefon, email, status (aktiv/krank/ferien/inaktiv) |
-| Schlüssel  | bezeichnung, kunde_id, anzahl_kopien, verloren |
-| Bewegung   | schluessel_id, datum_abgang, putzfrau_id, grund, erwartete_rueckgabe, datum_rueckgabe |
+| Entität          | Kernfelder |
+|------------------|-----------|
+| Kunde            | kundennummer, name, wohnort, zugeteilteReinigungskraft, aktiv, notizen |
+| Reinigungskraft  | name, aktiv, notizen |
+| Bewegung         | kunde, datumAbgang, grund, stellvertretungRK, bueroAblage, erwarteteRueckgabe, datumRueckgabe, poolEingetragen, notizen, Audit-Felder |
 
-Status einer Bewegung wird **berechnet**: Offen / Überfällig / Zurück.
+IDs sind UUID-basiert (CloudKit-`recordName`). Status einer Bewegung wird **berechnet**: Offen / Überfällig / Zurück. Schlüssel sind keine eigene Entität — sie sind über die Beziehung Kunde ↔ Bewegung modelliert.
 
 ## Wichtige Regeln (fachlich)
 

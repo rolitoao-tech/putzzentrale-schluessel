@@ -52,11 +52,11 @@ enum BewegungStatus {
 }
 
 struct Bewegung: Identifiable, Hashable {
-    var id: Int64 = 0
-    var kundenId: Int64 = 0
+    var id: UUID = UUID()
+    var kundenId: UUID = UUID()
     var datumAbgang: Date = Date()
     var grund: BewegungGrund = .einzelTermin
-    var stellvertretungRKId: Int64? = nil
+    var stellvertretungRKId: UUID? = nil
     var bueroAblage: BueroAblage? = nil
     var bueroAblageDetail: String = ""
     var erwarteteRueckgabe: Date? = nil
