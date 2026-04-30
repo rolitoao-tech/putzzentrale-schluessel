@@ -63,9 +63,23 @@ struct Bewegung: Identifiable, Hashable {
     var datumRueckgabe: Date? = nil
     var poolEingetragen: Bool = false
     var notizen: String = ""
-    // Audit-Felder (nur beim Erstellen gesetzt, nie überschrieben)
+    // Vertragsende-Marker (W4/W5): Schlüssel ging endgültig an den Kunde
+    var endgueltigeUebergabeAnKunde: Bool = false
+    // Audit-Felder Erstellung (nie überschrieben)
     var erstelltVon: String = ""
     var erstelltAm: Date? = nil
+    // Audit-Felder Modifikation (jede Änderung)
+    var modifiziertVon: String = ""
+    var modifiziertAm: Date? = nil
+    // Storno-Felder (W10)
+    var storniert: Bool = false
+    var stornoBegruendung: String? = nil
+    var storniertAm: Date? = nil
+    var storniertVon: String? = nil
+    // Prüfbedürftig-Marker (gesetzt durch W11-Cascade)
+    var pruefbeduerftig: Bool = false
+    var pruefbeduerftigGrund: String? = nil
+    var pruefbeduerftigAm: Date? = nil
 
     var status: BewegungStatus {
         if datumRueckgabe != nil { return .zurueck }
@@ -75,7 +89,10 @@ struct Bewegung: Identifiable, Hashable {
         return heute > faellig ? .ueberfaellig : .offen
     }
 
-    var istOffen: Bool { datumRueckgabe == nil }
+    var istOffen: Bool { datumRueckgabe == nil && !storniert }
+
+    // Markiert als prüfbedürftig und noch offen
+    var pruefbeduerftigOffen: Bool { pruefbeduerftig && istOffen }
 
     // Lesbarer Aufenthaltsort
     var aufenthaltsText: String {

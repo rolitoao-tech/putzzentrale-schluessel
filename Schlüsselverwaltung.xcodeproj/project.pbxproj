@@ -42,6 +42,7 @@
 		82AEF4C969454269B2ECD08D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9DFB42F4D010466F80448703 /* Schlüsselverwaltung.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Schlüsselverwaltung.entitlements"; sourceTree = "<group>"; };
 		B4C384BA58EB46B6827CCF07 /* Schluesselverwaltung.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Schluesselverwaltung.xcdatamodel; sourceTree = "<group>"; };
+		A2B5C7D9E1F3041526374859 /* Schluesselverwaltung 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Schluesselverwaltung 2.xcdatamodel"; sourceTree = "<group>"; };
 		C74BC39E2D084AB489F6EE8A /* PutzentraleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PutzentraleApp.swift; sourceTree = "<group>"; };
 		6496EE31A14348DFBC01A3F8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3932760DDCE84ACDBC370563 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
@@ -212,8 +213,9 @@
 			isa = XCVersionGroup;
 			children = (
 				B4C384BA58EB46B6827CCF07 /* Schluesselverwaltung.xcdatamodel */,
+				A2B5C7D9E1F3041526374859 /* Schluesselverwaltung 2.xcdatamodel */,
 			);
-			currentVersion = B4C384BA58EB46B6827CCF07 /* Schluesselverwaltung.xcdatamodel */;
+			currentVersion = A2B5C7D9E1F3041526374859 /* Schluesselverwaltung 2.xcdatamodel */;
 			path = Schluesselverwaltung.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

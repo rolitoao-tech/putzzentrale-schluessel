@@ -50,7 +50,7 @@ P = {n: new_id() for n in [
     "viewmodels_grp", "views_grp", "stammdaten_grp", "services_grp",
     "app_ref", "infoplist_ref", "entitlements_ref",
     "assets_ref", "assets_build",
-    "xcdm_inner_ref", "xcdm_group", "xcdm_build",
+    "xcdm_inner_ref", "xcdm_inner_v2_ref", "xcdm_group", "xcdm_build",
     "sources_phase", "frameworks_phase", "resources_phase",
     "proj_debug", "proj_release", "tgt_debug", "tgt_release",
     "proj_cfglist", "tgt_cfglist",
@@ -97,8 +97,9 @@ def pbxproj():
     w(P["assets_ref"], '/* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };')
     w(P["infoplist_ref"], '/* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };')
     w(P["entitlements_ref"], f'/* {APP_NAME}.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "{APP_NAME}.entitlements"; sourceTree = "<group>"; }};')
-    # Innere .xcdatamodel-Datei (current version)
+    # Innere .xcdatamodel-Dateien — v1 historisch, v2 aktuell (Lightweight-Migration)
     w(P["xcdm_inner_ref"], '/* Schluesselverwaltung.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Schluesselverwaltung.xcdatamodel; sourceTree = "<group>"; };')
+    w(P["xcdm_inner_v2_ref"], '/* Schluesselverwaltung 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Schluesselverwaltung 2.xcdatamodel"; sourceTree = "<group>"; };')
     for name, path in SOURCE_FILES:
         fname = os.path.basename(path)
         fref, _ = F[name]
@@ -196,8 +197,9 @@ def pbxproj():
     L.append('\t\t\tisa = XCVersionGroup;')
     L.append('\t\t\tchildren = (')
     L.append(f'\t\t\t\t{P["xcdm_inner_ref"]} /* Schluesselverwaltung.xcdatamodel */,')
+    L.append(f'\t\t\t\t{P["xcdm_inner_v2_ref"]} /* Schluesselverwaltung 2.xcdatamodel */,')
     L.append('\t\t\t);')
-    L.append(f'\t\t\tcurrentVersion = {P["xcdm_inner_ref"]} /* Schluesselverwaltung.xcdatamodel */;')
+    L.append(f'\t\t\tcurrentVersion = {P["xcdm_inner_v2_ref"]} /* Schluesselverwaltung 2.xcdatamodel */;')
     L.append('\t\t\tpath = Schluesselverwaltung.xcdatamodeld;')
     L.append('\t\t\tsourceTree = "<group>";')
     L.append('\t\t\tversionGroupType = wrapper.xcdatamodel;')

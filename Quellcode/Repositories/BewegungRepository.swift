@@ -19,7 +19,8 @@ final class BewegungRepository {
 
     func offene() -> [Bewegung] {
         let req = NSFetchRequest<CDBewegung>(entityName: "CDBewegung")
-        req.predicate = NSPredicate(format: "datumRueckgabe == nil")
+        // Offen = noch nicht zurückgegeben UND nicht storniert
+        req.predicate = NSPredicate(format: "datumRueckgabe == nil AND storniert == NO")
         req.sortDescriptors = [NSSortDescriptor(key: "erwarteteRueckgabe", ascending: true)]
         let result = (try? ctx.fetch(req)) ?? []
         return result.map(Self.toStruct)
@@ -35,7 +36,8 @@ final class BewegungRepository {
 
     func aktiveFuerKunde(_ kundenId: UUID) -> Bewegung? {
         let req = NSFetchRequest<CDBewegung>(entityName: "CDBewegung")
-        req.predicate = NSPredicate(format: "kunde.id == %@ AND datumRueckgabe == nil", kundenId as CVarArg)
+        // Aktive Bewegung = offen und nicht storniert
+        req.predicate = NSPredicate(format: "kunde.id == %@ AND datumRueckgabe == nil AND storniert == NO", kundenId as CVarArg)
         req.sortDescriptors = [NSSortDescriptor(key: "datumAbgang", ascending: false)]
         req.fetchLimit = 1
         return (try? ctx.fetch(req))?.first.map(Self.toStruct)
@@ -44,7 +46,7 @@ final class BewegungRepository {
     func fuerStellvertretung(_ rkId: UUID, nurOffen: Bool) -> [Bewegung] {
         let req = NSFetchRequest<CDBewegung>(entityName: "CDBewegung")
         if nurOffen {
-            req.predicate = NSPredicate(format: "stellvertretungRK.id == %@ AND datumRueckgabe == nil", rkId as CVarArg)
+            req.predicate = NSPredicate(format: "stellvertretungRK.id == %@ AND datumRueckgabe == nil AND storniert == NO", rkId as CVarArg)
         } else {
             req.predicate = NSPredicate(format: "stellvertretungRK.id == %@", rkId as CVarArg)
         }
@@ -78,6 +80,36 @@ final class BewegungRepository {
         save()
     }
 
+    // Storno (W10): nur für offene Bewegungen. Setzt Audit-Felder.
+    func stornieren(id: UUID, begruendung: String, von: String = NSUserName()) {
+        guard let cd = finden(id: id) else { return }
+        guard cd.datumRueckgabe == nil, cd.storniert == false else { return }
+        cd.storniert = true
+        cd.stornoBegruendung = begruendung
+        cd.storniertAm = Date()
+        cd.storniertVon = von
+        save()
+    }
+
+    // Prüfbedürftig-Marker setzen (durch W11-Cascade auf offene Bewegungen)
+    func pruefbeduerftigSetzen(id: UUID, grund: String) {
+        guard let cd = finden(id: id) else { return }
+        cd.pruefbeduerftig = true
+        cd.pruefbeduerftigGrund = grund
+        cd.pruefbeduerftigAm = Date()
+        save()
+    }
+
+    // Prüfbedürftig-Marker entfernen (User hat die Pendenz aufgelöst)
+    func pruefbeduerftigEntfernen(id: UUID) {
+        guard let cd = finden(id: id) else { return }
+        cd.pruefbeduerftig = false
+        cd.pruefbeduerftigGrund = nil
+        cd.pruefbeduerftigAm = nil
+        save()
+    }
+
+    // Hard-Delete: aktuell noch erlaubt. Wird in Schritt 4 (Storno-Workflow) gesperrt.
     func loeschen(id: UUID) {
         guard let cd = finden(id: id) else { return }
         ctx.delete(cd)
@@ -104,6 +136,20 @@ final class BewegungRepository {
         cd.datumRueckgabe     = b.datumRueckgabe
         cd.poolEingetragen    = b.poolEingetragen
         cd.notizen            = b.notizen
+        cd.endgueltigeUebergabeAnKunde = b.endgueltigeUebergabeAnKunde
+        // Audit-Felder Modifikation werden in Schritt 3 in den Mutations-Pfaden gesetzt,
+        // hier nur durchschleifen, falls Caller sie schon setzt
+        cd.modifiziertVon     = b.modifiziertVon
+        cd.modifiziertAm      = b.modifiziertAm
+        // Storno- und Prüfbedürftig-Felder laufen über eigene Methoden (siehe oben),
+        // applyFields schleift den geladenen Stand nur durch
+        cd.storniert          = b.storniert
+        cd.stornoBegruendung  = b.stornoBegruendung
+        cd.storniertAm        = b.storniertAm
+        cd.storniertVon       = b.storniertVon
+        cd.pruefbeduerftig    = b.pruefbeduerftig
+        cd.pruefbeduerftigGrund = b.pruefbeduerftigGrund
+        cd.pruefbeduerftigAm  = b.pruefbeduerftigAm
     }
 
     private func save() {
@@ -127,8 +173,18 @@ final class BewegungRepository {
             datumRueckgabe:      cd.datumRueckgabe,
             poolEingetragen:     cd.poolEingetragen,
             notizen:             cd.notizen ?? "",
+            endgueltigeUebergabeAnKunde: cd.endgueltigeUebergabeAnKunde,
             erstelltVon:         cd.erstelltVon ?? "",
-            erstelltAm:          cd.erstelltAm
+            erstelltAm:          cd.erstelltAm,
+            modifiziertVon:      cd.modifiziertVon ?? "",
+            modifiziertAm:       cd.modifiziertAm,
+            storniert:           cd.storniert,
+            stornoBegruendung:   cd.stornoBegruendung,
+            storniertAm:         cd.storniertAm,
+            storniertVon:        cd.storniertVon,
+            pruefbeduerftig:     cd.pruefbeduerftig,
+            pruefbeduerftigGrund: cd.pruefbeduerftigGrund,
+            pruefbeduerftigAm:   cd.pruefbeduerftigAm
         )
     }
 

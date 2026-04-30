@@ -29,6 +29,10 @@ final class PersistenceController {
             privateDescription.setOption(true as NSNumber,
                                          forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
+            // Lightweight-Migration für Schema-Versionswechsel (v1 → v2 etc.)
+            privateDescription.shouldMigrateStoreAutomatically = true
+            privateDescription.shouldInferMappingModelAutomatically = true
+
             privateDescription.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
                 containerIdentifier: Self.cloudKitContainerIdentifier
             )
@@ -47,6 +51,8 @@ final class PersistenceController {
                                         forKey: NSPersistentHistoryTrackingKey)
             sharedDescription.setOption(true as NSNumber,
                                         forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+            sharedDescription.shouldMigrateStoreAutomatically = true
+            sharedDescription.shouldInferMappingModelAutomatically = true
 
             let sharedOptions = NSPersistentCloudKitContainerOptions(
                 containerIdentifier: Self.cloudKitContainerIdentifier
@@ -69,15 +75,17 @@ final class PersistenceController {
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
 
-        // CloudKit-Schema einmalig pushen.
-        // Das Flag stellt sicher, dass dies pro Mac nur einmal ausgeführt wird –
-        // initializeCloudKitSchema ist teuer und nur fürs erstmalige Bootstrapping gedacht.
+        // CloudKit-Schema einmalig pro Schema-Version pushen.
+        // Flag-Name enthält die Schema-Version, damit nach einer Lightweight-Migration
+        // das neue Schema (z.B. neue Attribute auf CDBewegung/CDKunde) auch in CloudKit landet.
+        // initializeCloudKitSchema ist teuer und nur fürs Bootstrapping gedacht.
         #if DEBUG
-        if !inMemory && !UserDefaults.standard.bool(forKey: "cloudKitSchemaInitialisiert") {
+        let schemaFlag = "cloudKitSchemaInitialisiert_v2"
+        if !inMemory && !UserDefaults.standard.bool(forKey: schemaFlag) {
             do {
                 try container.initializeCloudKitSchema(options: [])
-                UserDefaults.standard.set(true, forKey: "cloudKitSchemaInitialisiert")
-                print("CloudKit-Schema erfolgreich initialisiert.")
+                UserDefaults.standard.set(true, forKey: schemaFlag)
+                print("CloudKit-Schema (v2) erfolgreich initialisiert.")
             } catch {
                 print("CloudKit-Schema-Initialisierung fehlgeschlagen: \(error)")
             }
