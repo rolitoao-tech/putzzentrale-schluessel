@@ -180,6 +180,47 @@ class AppViewModel: ObservableObject {
         ladeAlles()
     }
 
+    // MARK: - Vertragsende / Reaktivierung (W4, W5, W6)
+
+    // W4: Vertragsende über bestehende offene Büro-Bewegung.
+    // Bewegung wird mit Übergabedatum geschlossen und als endgültige Übergabe an Kunde markiert,
+    // die Notiz wird angehängt; Kunde wird inaktiv mit Vertragsende-Audit.
+    func vertragBeenden(kundeId: UUID, bewegungId: UUID, datum: Date, notiz: String) {
+        guard var b = alleBewegungen.first(where: { $0.id == bewegungId }) else { return }
+        b.datumRueckgabe = datum
+        b.endgueltigeUebergabeAnKunde = true
+        let notizTrimmed = notiz.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !notizTrimmed.isEmpty {
+            b.notizen = b.notizen.isEmpty ? notizTrimmed : "\(b.notizen)\n\n\(notizTrimmed)"
+        }
+        bewegungRepo.aktualisieren(b)
+        kundenRepo.vertragBeenden(id: kundeId, datum: datum)
+        ladeAlles()
+    }
+
+    // W5: Vertragsende direkt aus dem Einfordern-Dialog (Ablage „An Kunde").
+    // Bewegung wird sofort geschlossen angelegt, Kunde wird inaktiv.
+    func vertragsendeAusEinfordern(_ b: Bewegung) async {
+        bewegungRepo.anlegen(b)
+        let datum = b.datumRueckgabe ?? b.datumAbgang
+        kundenRepo.vertragBeenden(id: b.kundenId, datum: datum)
+        ladeAlles()
+    }
+
+    // W6: Kunde reaktivieren. Vertragsende-Felder am Kunde werden geleert,
+    // Bewegungs-Historie bleibt erhalten. Standort danach „Unbekannt" — der User
+    // soll W11 (manuell setzen) ausführen; dies wird in Schritt 5 ergänzt.
+    func reaktivieren(kundeId: UUID) {
+        kundenRepo.reaktivieren(id: kundeId)
+        ladeAlles()
+    }
+
+    // Letzte Bewegung eines Kunden, sortiert nach datumAbgang absteigend.
+    // Wird für die Reaktivierungs-Anzeige in der Standort-Karte gebraucht.
+    func letzteBewegung(kundenId: UUID) -> Bewegung? {
+        bewegungen(fuerKunde: kundenId).first
+    }
+
     // MARK: - Demo-Daten (nur für Test/Entwicklung)
 
     // Erzeugt 5 Reinigungskräfte und 20 Kunden mit gemischten Bewegungs-Zuständen.

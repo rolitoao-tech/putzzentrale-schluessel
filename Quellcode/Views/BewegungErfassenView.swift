@@ -10,12 +10,14 @@ private enum AblageWahl: String, CaseIterable {
     case safe            = "Safe"
     case dossier         = "Dossier"
     case stellvertretung = "Stellvertretung"
+    case anKunde         = "An Kunde"
 
     var icon: String {
         switch self {
         case .safe:            return "lock.fill"
         case .dossier:         return "folder.fill"
         case .stellvertretung: return "person.2.fill"
+        case .anKunde:         return "person.crop.circle.badge.checkmark"
         }
     }
 }
@@ -39,6 +41,7 @@ struct BewegungErfassenView: View {
     @State private var datumRueckgabe = Date()
     @State private var poolEingetragen = false
     @State private var notizen = ""
+    @State private var zeigeVertragsendeBestaetigung = false
 
     var body: some View {
         switch modus {
@@ -94,26 +97,32 @@ struct BewegungErfassenView: View {
                 }
 
                 Section("Details") {
-                    DatePicker("Datum Einfordern", selection: $datumAbgang, displayedComponents: .date)
-                    Picker("Grund", selection: $grund) {
-                        ForEach(BewegungGrund.allCases, id: \.self) { g in
-                            Text(g.rawValue).tag(g)
+                    DatePicker(
+                        ablageWahl == .anKunde ? "Übergabedatum" : "Datum Einfordern",
+                        selection: $datumAbgang,
+                        displayedComponents: .date
+                    )
+                    if ablageWahl != .anKunde {
+                        Picker("Grund", selection: $grund) {
+                            ForEach(BewegungGrund.allCases, id: \.self) { g in
+                                Text(g.rawValue).tag(g)
+                            }
                         }
-                    }
-                    Toggle("Erwartetes Rückgabedatum", isOn: $setzeRueckgabedatum)
-                    if setzeRueckgabedatum {
-                        DatePicker(
-                            "Erwartet zurück",
-                            selection: $erwarteteRueckgabe,
-                            in: datumAbgang...,
-                            displayedComponents: .date
-                        )
+                        Toggle("Erwartetes Rückgabedatum", isOn: $setzeRueckgabedatum)
+                        if setzeRueckgabedatum {
+                            DatePicker(
+                                "Erwartet zurück",
+                                selection: $erwarteteRueckgabe,
+                                in: datumAbgang...,
+                                displayedComponents: .date
+                            )
+                        }
                     }
                 }
 
                 Section("Ablage") {
                     Picker("Ablageort", selection: $ablageWahl) {
-                        ForEach(AblageWahl.allCases, id: \.self) { w in
+                        ForEach(verfuegbareAblagen(istBearbeiten: istBearbeiten), id: \.self) { w in
                             Label(w.rawValue, systemImage: w.icon).tag(w)
                         }
                     }
@@ -131,26 +140,35 @@ struct BewegungErfassenView: View {
                                 Text(r.name).tag(Optional(r))
                             }
                         }
+                    case .anKunde:
+                        Label(
+                            "Schlüssel geht endgültig an den Kunde. Kunde wird inaktiv.",
+                            systemImage: "info.circle"
+                        )
+                        .font(.caption).foregroundColor(.secondary)
                     }
                 }
 
                 // Historische Erfassung: Rückgabe bereits erfolgt
-                Section("Rückgabe") {
-                    Toggle("Schlüssel bereits zurückgegeben", isOn: $bereitsZurueck)
-                    if bereitsZurueck {
-                        DatePicker(
-                            "Datum Rückgabe",
-                            selection: $datumRueckgabe,
-                            in: datumAbgang...,
-                            displayedComponents: .date
-                        )
+                // Bei „An Kunde" entfällt diese Sektion — die Bewegung wird automatisch geschlossen.
+                if ablageWahl != .anKunde {
+                    Section("Rückgabe") {
+                        Toggle("Schlüssel bereits zurückgegeben", isOn: $bereitsZurueck)
+                        if bereitsZurueck {
+                            DatePicker(
+                                "Datum Rückgabe",
+                                selection: $datumRueckgabe,
+                                in: datumAbgang...,
+                                displayedComponents: .date
+                            )
+                        }
                     }
                 }
 
                 Section {
                     Toggle(isOn: $poolEingetragen) {
                         HStack(spacing: 6) {
-                            Text("Im Pool (CRM) eingetragen")
+                            Text(poolLabel)
                             if !poolEingetragen {
                                 Text("(Pflichtfeld)")
                                     .font(.caption).foregroundColor(.red)
@@ -161,8 +179,17 @@ struct BewegungErfassenView: View {
                     Text("CRM")
                 }
 
-                Section("Notizen (optional)") {
+                Section {
                     TextEditor(text: $notizen).frame(height: 60)
+                } header: {
+                    HStack(spacing: 6) {
+                        Text(ablageWahl == .anKunde ? "Notiz" : "Notizen")
+                        if ablageWahl == .anKunde && !notizGueltigFuerVertragsende {
+                            Text("(Pflichtfeld)").font(.caption).foregroundColor(.red)
+                        } else if ablageWahl != .anKunde {
+                            Text("(optional)").font(.caption).foregroundColor(.secondary)
+                        }
+                    }
                 }
             }
             .formStyle(.grouped)
@@ -179,8 +206,12 @@ struct BewegungErfassenView: View {
                     .buttonStyle(.bordered)
                 }
                 Spacer()
-                Button("Speichern") {
-                    speichern(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: bestehendesBewegung)
+                Button(ablageWahl == .anKunde ? "Vertrag beenden" : "Speichern") {
+                    if ablageWahl == .anKunde && bestehendesBewegung == nil {
+                        zeigeVertragsendeBestaetigung = true
+                    } else {
+                        speichern(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: bestehendesBewegung)
+                    }
                 }
                 .keyboardShortcut(.return, modifiers: .command)
                 .buttonStyle(.borderedProminent)
@@ -190,6 +221,31 @@ struct BewegungErfassenView: View {
         }
         .frame(minWidth: 440, minHeight: 560)
         .onAppear { vorbefuellen(vorausgewaehlt: vorausgewaehlt, bewegung: bestehendesBewegung) }
+        .confirmationDialog(
+            "Vertrag beenden?",
+            isPresented: $zeigeVertragsendeBestaetigung,
+            titleVisibility: .visible
+        ) {
+            Button("Vertrag beenden", role: .destructive) {
+                speichern(vorausgewaehlt: vorausgewaehlt, bestehendesBewegung: bestehendesBewegung)
+            }
+        } message: {
+            Text("Der Schlüssel wird endgültig an den Kunde übergeben und der Kunde wird inaktiv. Diese Aktion lässt sich nur über «Reaktivieren» rückgängig machen.")
+        }
+    }
+
+    // Beim Bearbeiten ist „An Kunde" nicht erlaubt — das Vertragsende ist ein eigener
+    // Workflow, kein Edit-Pfad (siehe Lücke H in Prozesslogik.md).
+    private func verfuegbareAblagen(istBearbeiten: Bool) -> [AblageWahl] {
+        istBearbeiten ? AblageWahl.allCases.filter { $0 != .anKunde } : AblageWahl.allCases
+    }
+
+    private var poolLabel: String {
+        ablageWahl == .anKunde ? "Im CRM ausgetragen" : "Im Pool (CRM) eingetragen"
+    }
+
+    private var notizGueltigFuerVertragsende: Bool {
+        !notizen.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // MARK: - Rückgabe-Formular
@@ -265,7 +321,12 @@ struct BewegungErfassenView: View {
 
     private func formularGueltig(vorausgewaehlt: Kunde?, bestehendesBewegung: Bewegung?) -> Bool {
         let kundeOk = bestehendesBewegung != nil || vorausgewaehlt != nil || gewaehlterKunde != nil
-        let ablageOk = ablageWahl != .stellvertretung || gewaehlteStellvertretung != nil
+        let ablageOk: Bool
+        switch ablageWahl {
+        case .stellvertretung: ablageOk = gewaehlteStellvertretung != nil
+        case .anKunde:         ablageOk = notizGueltigFuerVertragsende
+        case .safe, .dossier:  ablageOk = true
+        }
         return kundeOk && ablageOk && poolEingetragen
     }
 
@@ -317,7 +378,11 @@ struct BewegungErfassenView: View {
         case .dossier:
             stv = nil; ablage = .dossier
             ablageDetail = dossierKuerzel.trimmingCharacters(in: .whitespaces)
+        case .anKunde:
+            stv = nil; ablage = nil; ablageDetail = ""
         }
+
+        let istVertragsende = ablageWahl == .anKunde
 
         var b = bestehendesBewegung ?? Bewegung()
         b.kundenId            = kundenId
@@ -326,14 +391,20 @@ struct BewegungErfassenView: View {
         b.stellvertretungRKId = stv
         b.bueroAblage         = ablage
         b.bueroAblageDetail   = ablageDetail
-        b.erwarteteRueckgabe  = setzeRueckgabedatum ? erwarteteRueckgabe : nil
-        b.datumRueckgabe      = bereitsZurueck ? datumRueckgabe : nil
+        b.erwarteteRueckgabe  = istVertragsende ? nil : (setzeRueckgabedatum ? erwarteteRueckgabe : nil)
+        b.datumRueckgabe      = istVertragsende ? datumAbgang : (bereitsZurueck ? datumRueckgabe : nil)
+        b.endgueltigeUebergabeAnKunde = istVertragsende
         b.poolEingetragen     = poolEingetragen
         b.notizen             = notizen
 
         if bestehendesBewegung != nil {
             vm.bewegungAktualisieren(b)
             dismiss()
+        } else if istVertragsende {
+            Task {
+                await vm.vertragsendeAusEinfordern(b)
+                await MainActor.run { dismiss() }
+            }
         } else {
             Task {
                 await vm.abgangErfassen(b)

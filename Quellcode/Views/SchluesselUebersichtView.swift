@@ -173,6 +173,8 @@ struct KundeDetailView: View {
     @State private var kunde: Kunde
     @State private var zeigeBearbeiten = false
     @State private var zeigeLoeschen = false
+    @State private var zeigeVertragBeendenSheet = false
+    @State private var vertragsendeHinweis: String? = nil
 
     let onAktualisiert: (Kunde) -> Void
 
@@ -183,6 +185,18 @@ struct KundeDetailView: View {
 
     private var bewegungen: [Bewegung] { vm.bewegungen(fuerKunde: kunde.id) }
     private var aktiveBewegung: Bewegung? { vm.aktiveBewegung(kundenId: kunde.id) }
+
+    // Reaktivierungs-Banner: Kunde aktiv, ohne manuellen Standort,
+    // letzte Bewegung war eine Vertragsende-Bewegung.
+    private var zeigeReaktivierungsBanner: Bool {
+        guard kunde.aktiv,
+              kunde.standortManuellAm == nil,
+              aktiveBewegung == nil,
+              let letzte = vm.letzteBewegung(kundenId: kunde.id),
+              letzte.endgueltigeUebergabeAnKunde
+        else { return false }
+        return true
+    }
 
     var body: some View {
         ScrollView {
@@ -201,11 +215,41 @@ struct KundeDetailView: View {
                 zeigeBearbeiten = false
             }
         }
+        .sheet(isPresented: $zeigeVertragBeendenSheet) {
+            if let b = aktiveBewegung {
+                VertragBeendenSheet(kunde: kunde, bewegung: b)
+            }
+        }
         .confirmationDialog("Kunde «\(kunde.name)» löschen?", isPresented: $zeigeLoeschen, titleVisibility: .visible) {
             Button("Löschen", role: .destructive) { vm.kundeLoeschen(id: kunde.id) }
         } message: { Text("Alle Bewegungen dieses Kunden werden ebenfalls gelöscht.") }
+        .alert(
+            "Vertrag beenden",
+            isPresented: Binding(
+                get: { vertragsendeHinweis != nil },
+                set: { if !$0 { vertragsendeHinweis = nil } }
+            ),
+            presenting: vertragsendeHinweis
+        ) { _ in
+            Button("OK") { vertragsendeHinweis = nil }
+        } message: { msg in
+            Text(msg)
+        }
         .onReceive(vm.$kunden) { liste in
             if let aktuell = liste.first(where: { $0.id == kunde.id }) { kunde = aktuell }
+        }
+    }
+
+    // Routing für W4: je nach Standort entweder Sheet öffnen oder Hinweis anzeigen.
+    private func vertragBeendenAusloesen() {
+        if let b = aktiveBewegung {
+            if b.bueroAblage != nil {
+                zeigeVertragBeendenSheet = true
+            } else {
+                vertragsendeHinweis = "Der Schlüssel ist aktuell bei einer Stellvertretung. Bitte zuerst zurück ins Büro holen, danach Vertrag beenden."
+            }
+        } else {
+            vertragsendeHinweis = "Es ist keine offene Bewegung erfasst. Lege eine neue Bewegung mit Ablage «An Kunde» an, um den Vertrag direkt zu beenden."
         }
     }
 
@@ -237,6 +281,10 @@ struct KundeDetailView: View {
             HStack {
                 Button("Bearbeiten") { zeigeBearbeiten = true }.buttonStyle(.bordered)
                 Menu {
+                    if kunde.aktiv {
+                        Button("Vertrag beenden…") { vertragBeendenAusloesen() }
+                        Divider()
+                    }
                     Button("Löschen", role: .destructive) { zeigeLoeschen = true }
                 } label: { Image(systemName: "ellipsis.circle") }
                 .buttonStyle(.bordered)
@@ -245,14 +293,24 @@ struct KundeDetailView: View {
     }
 
     // MARK: - Standort-Karte
-
+    //
+    // Reihenfolge gemäss Prozesslogik.md Kapitel 6 (gekürzt für Schritt 2):
+    // 1. Vertrag beendet → VertragBeendetKarte
+    // 2. Offene Bewegung → SchluesselUnterwegsKarte
+    // 3. Reaktivierungs-Banner über SchluesselBeiRKKarte
+    // 4. Sonst → SchluesselBeiRKKarte
     @ViewBuilder
     private var standortKarte: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Aktueller Standort").font(.headline)
-            if let b = aktiveBewegung {
+            if kunde.schluesselZurueckgegebenAm != nil {
+                VertragBeendetKarte(kunde: kunde)
+            } else if let b = aktiveBewegung {
                 SchluesselUnterwegsKarte(bewegung: b, kunde: kunde)
             } else {
+                if zeigeReaktivierungsBanner {
+                    ReaktivierungsBanner()
+                }
                 SchluesselBeiRKKarte(kunde: kunde)
             }
         }
@@ -356,6 +414,162 @@ struct SchluesselUnterwegsKarte: View {
             Button("Löschen", role: .destructive) { vm.bewegungLoeschen(id: bewegung.id) }
         } message: {
             Text("Der Schlüssel gilt danach wieder als beim Normalzustand (bei zugeteilter RK).")
+        }
+    }
+}
+
+// MARK: - Vertrag beendet (W4/W5)
+
+struct VertragBeendetKarte: View {
+    @EnvironmentObject var vm: AppViewModel
+    let kunde: Kunde
+    @State private var zeigeReaktivieren = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.seal.fill").foregroundColor(.gray)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Schlüssel beim Kunde").fontWeight(.medium).foregroundColor(.secondary)
+                let datumText = kunde.schluesselZurueckgegebenAm.map(\.anzeigeText) ?? "–"
+                let vonText = (kunde.schluesselZurueckgegebenVon?.isEmpty == false)
+                    ? " · \(kunde.schluesselZurueckgegebenVon!)" : ""
+                Text("Vertrag beendet am \(datumText)\(vonText)")
+                    .font(.caption).foregroundColor(.secondary)
+            }
+            Spacer()
+            Button("Reaktivieren") { zeigeReaktivieren = true }
+                .buttonStyle(.bordered).controlSize(.small)
+        }
+        .padding(12)
+        .background(Color.secondary.opacity(0.10))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .confirmationDialog(
+            "Kunde «\(kunde.name)» reaktivieren?",
+            isPresented: $zeigeReaktivieren,
+            titleVisibility: .visible
+        ) {
+            Button("Reaktivieren") { vm.reaktivieren(kundeId: kunde.id) }
+        } message: {
+            Text("Der Kunde wird wieder aktiv. Der Schlüssel-Standort ist danach unklar und sollte manuell gesetzt werden. Bestehende Vertragsende-Bewegungen bleiben in der Historie erhalten.")
+        }
+    }
+}
+
+// MARK: - Reaktivierungs-Banner
+
+// Wird über SchluesselBeiRKKarte gezeigt, wenn der Kunde nach Vertragsende reaktiviert
+// wurde, aber noch kein manueller Standort gesetzt ist (W11 — kommt in Schritt 5).
+struct ReaktivierungsBanner: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.red)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Standort nach Reaktivierung manuell prüfen")
+                    .fontWeight(.medium).foregroundColor(.red)
+                Text("Der Schlüssel ist real noch nicht zurück bei der zugeteilten RK. Bitte über «Standort manuell setzen…» (folgt in Schritt 5) klären.")
+                    .font(.caption).foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+        .padding(10)
+        .background(Color.red.opacity(0.10))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+// MARK: - Vertrag-beenden-Sheet (W4)
+
+struct VertragBeendenSheet: View {
+    @EnvironmentObject var vm: AppViewModel
+    @Environment(\.dismiss) private var dismiss
+    let kunde: Kunde
+    let bewegung: Bewegung
+
+    @State private var datum = Date()
+    @State private var notiz = ""
+    @State private var crmAusgetragen = false
+    @State private var zeigeBestaetigung = false
+
+    private var notizGueltig: Bool {
+        !notiz.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var formularGueltig: Bool {
+        notizGueltig && crmAusgetragen
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Vertrag beenden").font(.title3).fontWeight(.semibold)
+                Spacer()
+                Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
+            }
+            .padding()
+            Divider()
+            Form {
+                Section("Kunde") {
+                    LabeledContent("Kunde") {
+                        Text("\(kunde.name) (Nr. \(kunde.kundennummer))").foregroundColor(.secondary)
+                    }
+                    LabeledContent("Schlüssel aktuell") {
+                        Text(bewegung.aufenthaltsText).foregroundColor(.secondary)
+                    }
+                }
+                Section("Übergabe") {
+                    DatePicker(
+                        "Übergabedatum",
+                        selection: $datum,
+                        in: bewegung.datumAbgang...,
+                        displayedComponents: .date
+                    )
+                }
+                Section {
+                    Toggle(isOn: $crmAusgetragen) {
+                        HStack(spacing: 6) {
+                            Text("Im CRM ausgetragen")
+                            if !crmAusgetragen {
+                                Text("(Pflichtfeld)").font(.caption).foregroundColor(.red)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("CRM")
+                }
+                Section {
+                    TextEditor(text: $notiz).frame(height: 80)
+                } header: {
+                    HStack(spacing: 6) {
+                        Text("Notiz")
+                        if !notizGueltig {
+                            Text("(Pflichtfeld)").font(.caption).foregroundColor(.red)
+                        }
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            Divider()
+            HStack {
+                Spacer()
+                Button("Vertrag beenden") { zeigeBestaetigung = true }
+                    .keyboardShortcut(.return, modifiers: .command)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!formularGueltig)
+            }
+            .padding()
+        }
+        .frame(minWidth: 420, minHeight: 380)
+        .confirmationDialog(
+            "Vertrag von «\(kunde.name)» beenden?",
+            isPresented: $zeigeBestaetigung,
+            titleVisibility: .visible
+        ) {
+            Button("Vertrag beenden", role: .destructive) {
+                vm.vertragBeenden(kundeId: kunde.id, bewegungId: bewegung.id, datum: datum, notiz: notiz)
+                dismiss()
+            }
+        } message: {
+            Text("Die offene Bewegung wird mit Übergabedatum geschlossen und der Kunde wird inaktiv. Diese Aktion lässt sich nur über «Reaktivieren» rückgängig machen.")
         }
     }
 }
