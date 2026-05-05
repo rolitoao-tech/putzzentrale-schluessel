@@ -24,18 +24,18 @@ struct KundenView: View {
 
     var body: some View {
         kundenListe
-            .navigationTitle("Kunden")
+            .navigationTitle("KD")
             .toolbar {
                 ToolbarItem {
                     Toggle(isOn: $nurImUmlauf) {
                         Label("Im Umlauf", systemImage: "arrow.left.arrow.right")
                     }
                     .toggleStyle(.button)
-                    .help("Nur Schlüssel anzeigen, die nicht bei der zugeteilten RK sind")
+                    .help("Nur Schlüssel anzeigen, die nicht bei der zugeteilten PF sind")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button { zeigeNeuenKunden = true } label: {
-                        Label("Neuer Kunde", systemImage: "plus")
+                        Label("Neuer KD", systemImage: "plus")
                     }
                 }
             }
@@ -57,7 +57,7 @@ struct KundenView: View {
         VStack(spacing: 0) {
             HStack {
                 Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-                TextField("Name, Kundennr., Wohnort", text: $suchtext).textFieldStyle(.plain)
+                TextField("Name, KD-Nr., Wohnort", text: $suchtext).textFieldStyle(.plain)
                 if !suchtext.isEmpty {
                     Button { suchtext = "" } label: {
                         Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
@@ -201,9 +201,9 @@ struct KundeDetailView: View {
                 zeigeBearbeiten = false
             }
         }
-        .confirmationDialog("Kunde «\(kunde.name)» löschen?", isPresented: $zeigeLoeschen, titleVisibility: .visible) {
+        .confirmationDialog("KD «\(kunde.name)» löschen?", isPresented: $zeigeLoeschen, titleVisibility: .visible) {
             Button("Löschen", role: .destructive) { vm.kundeLoeschen(id: kunde.id) }
-        } message: { Text("Alle Bewegungen dieses Kunden werden ebenfalls gelöscht.") }
+        } message: { Text("Alle Bewegungen dieses KD werden ebenfalls gelöscht.") }
         .onReceive(vm.$kunden) { liste in
             if let aktuell = liste.first(where: { $0.id == kunde.id }) { kunde = aktuell }
         }
@@ -355,7 +355,7 @@ struct SchluesselUnterwegsKarte: View {
         ) {
             Button("Löschen", role: .destructive) { vm.bewegungLoeschen(id: bewegung.id) }
         } message: {
-            Text("Der Schlüssel gilt danach wieder als beim Normalzustand (bei zugeteilter RK).")
+            Text("Der Schlüssel gilt danach wieder als beim Normalzustand (bei zugeteilter PF).")
         }
     }
 }
@@ -373,11 +373,11 @@ struct SchluesselBeiRKKarte: View {
             VStack(alignment: .leading, spacing: 2) {
                 if let rk = vm.zugeteilteReinigungskraft(kundenId: kunde.id) {
                     Text("Bei \(rk.name)").fontWeight(.medium).foregroundColor(.green)
-                    Text("Normalzustand – Schlüssel bei der zugeteilten Reinigungskraft")
+                    Text("Normalzustand – Schlüssel bei der zugeteilten PF")
                         .font(.caption).foregroundColor(.secondary)
                 } else {
-                    Text("Keine Reinigungskraft zugeteilt").fontWeight(.medium).foregroundColor(.secondary)
-                    Text("Bitte Kunde bearbeiten und eine RK zuteilen")
+                    Text("Keine PF zugeteilt").fontWeight(.medium).foregroundColor(.secondary)
+                    Text("Bitte KD bearbeiten und eine PF zuteilen")
                         .font(.caption).foregroundColor(.secondary)
                 }
             }
@@ -414,7 +414,7 @@ struct StellvertretungZuweisenView: View {
             .padding()
             Divider()
             Form {
-                Section("Reinigungskraft") {
+                Section("PF") {
                     Picker("Stellvertretung", selection: $gewaehlteRK) {
                         Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
                         ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
@@ -520,7 +520,14 @@ struct KundeFormular: View {
 
     @State private var kundennummer = ""
     @State private var name = ""
+    @State private var firma = ""
+    @State private var strasse = ""
+    @State private var plz = ""
     @State private var wohnort = ""
+    @State private var telefon = ""
+    @State private var mobil = ""
+    @State private var email = ""
+    @State private var auftragsnummer = ""
     @State private var zugeteilteRKId: UUID? = nil
     @State private var aktiv = true
     @State private var notizen = ""
@@ -528,7 +535,7 @@ struct KundeFormular: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(vorlage == nil ? "Neuer Kunde" : "Kunde bearbeiten")
+                Text(vorlage == nil ? "Neuer KD" : "KD bearbeiten")
                     .font(.title3).fontWeight(.semibold)
                 Spacer()
                 Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
@@ -536,15 +543,28 @@ struct KundeFormular: View {
             .padding()
             Divider()
             Form {
-                Section("Kundennummer") {
-                    TextField("z.B. 1042", text: $kundennummer)
-                }
-                Section("Name & Wohnort") {
+                Section("Stammdaten") {
+                    TextField("KD-Nr. (z.B. 1042)", text: $kundennummer)
                     TextField("Name", text: $name)
-                    TextField("Wohnort (optional)", text: $wohnort)
+                    TextField("Firma (optional)", text: $firma)
                 }
-                Section("Zugeteilte Reinigungskraft") {
-                    Picker("Reinigungskraft", selection: $zugeteilteRKId) {
+                Section("Adresse") {
+                    TextField("Strasse", text: $strasse)
+                    HStack {
+                        TextField("PLZ", text: $plz).frame(maxWidth: 80)
+                        TextField("Ort", text: $wohnort)
+                    }
+                }
+                Section("Kontakt") {
+                    TextField("Telefon", text: $telefon)
+                    TextField("Mobil", text: $mobil)
+                    TextField("E-Mail", text: $email)
+                }
+                Section("Auftrag") {
+                    TextField("Auftrags-Nr.", text: $auftragsnummer)
+                }
+                Section("Zugeteilte PF") {
+                    Picker("PF", selection: $zugeteilteRKId) {
                         Text("Keine Zuteilung").tag(Optional<UUID>(nil))
                         ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
                             Text(r.name).tag(Optional(r.id))
@@ -562,9 +582,16 @@ struct KundeFormular: View {
                 Spacer()
                 Button("Speichern") {
                     var k = vorlage ?? Kunde()
-                    k.kundennummer = kundennummer.trimmingCharacters(in: .whitespaces)
-                    k.name         = name.trimmingCharacters(in: .whitespaces)
-                    k.wohnort      = wohnort.trimmingCharacters(in: .whitespaces)
+                    k.kundennummer   = kundennummer.trimmingCharacters(in: .whitespaces)
+                    k.name           = name.trimmingCharacters(in: .whitespaces)
+                    k.firma          = firma.trimmingCharacters(in: .whitespaces)
+                    k.strasse        = strasse.trimmingCharacters(in: .whitespaces)
+                    k.plz            = plz.trimmingCharacters(in: .whitespaces)
+                    k.wohnort        = wohnort.trimmingCharacters(in: .whitespaces)
+                    k.telefon        = telefon.trimmingCharacters(in: .whitespaces)
+                    k.mobil          = mobil.trimmingCharacters(in: .whitespaces)
+                    k.email          = email.trimmingCharacters(in: .whitespaces)
+                    k.auftragsnummer = auftragsnummer.trimmingCharacters(in: .whitespaces)
                     k.zugeteilteReinigungskraftId = zugeteilteRKId
                     k.aktiv   = aktiv
                     k.notizen = notizen
@@ -577,12 +604,19 @@ struct KundeFormular: View {
             }
             .padding()
         }
-        .frame(minWidth: 380, minHeight: 400)
+        .frame(minWidth: 440, minHeight: 600)
         .onAppear {
             if let k = vorlage {
                 kundennummer   = k.kundennummer
                 name           = k.name
+                firma          = k.firma
+                strasse        = k.strasse
+                plz            = k.plz
                 wohnort        = k.wohnort
+                telefon        = k.telefon
+                mobil          = k.mobil
+                email          = k.email
+                auftragsnummer = k.auftragsnummer
                 zugeteilteRKId = k.zugeteilteReinigungskraftId
                 aktiv          = k.aktiv
                 notizen        = k.notizen

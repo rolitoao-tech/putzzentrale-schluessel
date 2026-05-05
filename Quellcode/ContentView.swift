@@ -1,11 +1,12 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 enum Navigationsbereich: String, Hashable {
     case uebersicht           = "Übersicht"
     case schluesselbewegungen = "Schlüsselbewegungen"
     case historie             = "Historie"
-    case kunden               = "Kunden"
-    case reinigungskraefte    = "Reinigungskräfte"
+    case kunden               = "KD"
+    case reinigungskraefte    = "PF"
 }
 
 struct ContentView: View {
@@ -16,6 +17,14 @@ struct ContentView: View {
     @State private var ausgewaehlteBewegung: Bewegung?
     @State private var rkFokus: RKFokus?
     @State private var spaltenSichtbarkeit: NavigationSplitViewVisibility = .all
+
+    // Import-Status: ein gemeinsamer File-Picker, Typ-Schalter pro Aufruf.
+    enum ImportTyp { case pf, kd }
+    @State private var zeigeFilePicker = false
+    @State private var importTyp: ImportTyp = .pf
+    @State private var importPFErgebnis: ImportErgebnis<Reinigungskraft>?
+    @State private var importKDErgebnis: ImportErgebnis<Kunde>?
+    @State private var importFehler: String?
 
     var body: some View {
         NavigationSplitView(columnVisibility: $spaltenSichtbarkeit) {
@@ -28,6 +37,84 @@ struct ContentView: View {
             detailSpalte
         }
         .environmentObject(vm)
+        .onReceive(NotificationCenter.default.publisher(for: .importPFStarten)) { _ in
+            importTyp = .pf
+            zeigeFilePicker = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .importKDStarten)) { _ in
+            importTyp = .kd
+            zeigeFilePicker = true
+        }
+        .fileImporter(isPresented: $zeigeFilePicker,
+                      allowedContentTypes: [.commaSeparatedText, .plainText, .text]) { result in
+            switch importTyp {
+            case .pf: verarbeitePFAuswahl(result)
+            case .kd: verarbeiteKDAuswahl(result)
+            }
+        }
+        .sheet(item: $importPFErgebnis) { ergebnis in
+            ImportVorschauView(
+                titel: "PF-Import: Vorschau",
+                ergebnis: ergebnis,
+                zeileBeschreibung: { pf in
+                    var teile = [pf.name]
+                    if !pf.ort.isEmpty { teile.append(pf.ort) }
+                    if !pf.mobil.isEmpty { teile.append(pf.mobil) }
+                    return teile.joined(separator: " · ")
+                },
+                onImport: { vm.pfImportieren(ergebnis.neue) }
+            )
+        }
+        .sheet(item: $importKDErgebnis) { ergebnis in
+            ImportVorschauView(
+                titel: "KD-Import: Vorschau",
+                ergebnis: ergebnis,
+                zeileBeschreibung: { k in
+                    var teile = ["\(k.kundennummer) – \(k.name)"]
+                    if !k.wohnort.isEmpty { teile.append(k.wohnort) }
+                    if !k.mobil.isEmpty { teile.append(k.mobil) }
+                    return teile.joined(separator: " · ")
+                },
+                onImport: { vm.kdImportieren(ergebnis.neue) }
+            )
+        }
+        .alert("Import-Fehler", isPresented: .constant(importFehler != nil), actions: {
+            Button("OK") { importFehler = nil }
+        }, message: {
+            Text(importFehler ?? "")
+        })
+    }
+
+    // MARK: - Import-Verarbeitung
+
+    private func verarbeitePFAuswahl(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let url):
+            let zugriff = url.startAccessingSecurityScopedResource()
+            defer { if zugriff { url.stopAccessingSecurityScopedResource() } }
+            do {
+                importPFErgebnis = try StammdatenImporter.ladePF(url: url, bestehende: vm.reinigungskraefte)
+            } catch {
+                importFehler = error.localizedDescription
+            }
+        case .failure(let err):
+            importFehler = err.localizedDescription
+        }
+    }
+
+    private func verarbeiteKDAuswahl(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let url):
+            let zugriff = url.startAccessingSecurityScopedResource()
+            defer { if zugriff { url.stopAccessingSecurityScopedResource() } }
+            do {
+                importKDErgebnis = try StammdatenImporter.ladeKD(url: url, bestehende: vm.kunden)
+            } catch {
+                importFehler = error.localizedDescription
+            }
+        case .failure(let err):
+            importFehler = err.localizedDescription
+        }
     }
 
     // MARK: - Seitenleiste
@@ -46,10 +133,10 @@ struct ContentView: View {
 
             Section {
                 NavigationLink(value: Navigationsbereich.kunden) {
-                    Label("Kunden", systemImage: "key.fill")
+                    Label("KD", systemImage: "key.fill")
                 }
                 NavigationLink(value: Navigationsbereich.reinigungskraefte) {
-                    Label("Reinigungskräfte", systemImage: "person.2.fill")
+                    Label("PF", systemImage: "person.2.fill")
                 }
             } header: {
                 Text("Stammdaten").padding(.leading, 4)
@@ -127,7 +214,7 @@ struct ContentView: View {
                 KundeDetailView(kunde: k, onAktualisiert: { ausgewaehlterKunde = $0 })
                     .id(k.id)
             } else {
-                leerZustand(symbol: "key.fill", text: "Kunde auswählen")
+                leerZustand(symbol: "key.fill", text: "KD auswählen")
             }
 
         case .reinigungskraefte:
@@ -139,7 +226,7 @@ struct ContentView: View {
                 )
                 .id(r.id)
             } else {
-                leerZustand(symbol: "person.2.fill", text: "Reinigungskraft auswählen")
+                leerZustand(symbol: "person.2.fill", text: "PF auswählen")
             }
         }
     }

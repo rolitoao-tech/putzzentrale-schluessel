@@ -31,6 +31,8 @@
 		20D2BDC964C445088F0EBD5A /* EinstellungenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */; };
 		995F6CAAB2FE4FF0B99003BE /* ReinigungskraefteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126683290D564613B8ABB889 /* ReinigungskraefteView.swift */; };
 		5B95F5AA58B54A8AAB94CCB4 /* ErinnerungsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DFA7FE34F4494A2747A4B /* ErinnerungsService.swift */; };
+		DA49D29E45D9025287996115 /* StammdatenImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2075920777CCF0DEDC6264 /* StammdatenImporter.swift */; };
+		EC16950BC7720A98CCD3FE7C /* ImportVorschauView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C45AF61E00DCE560379A4B /* ImportVorschauView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +63,8 @@
 		27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EinstellungenView.swift; sourceTree = "<group>"; };
 		126683290D564613B8ABB889 /* ReinigungskraefteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReinigungskraefteView.swift; sourceTree = "<group>"; };
 		868DFA7FE34F4494A2747A4B /* ErinnerungsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErinnerungsService.swift; sourceTree = "<group>"; };
+		8E2075920777CCF0DEDC6264 /* StammdatenImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StammdatenImporter.swift; sourceTree = "<group>"; };
+		F6C45AF61E00DCE560379A4B /* ImportVorschauView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportVorschauView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,6 +186,7 @@
 				9403EC98A2DB411B8AC45198 /* BewegungErfassenView.swift */,
 				27CA7F6FC95A49B393EA174E /* EinstellungenView.swift */,
 				5262C22FED5E47CE97D7BC3E /* Stammdaten */,
+							F6C45AF61E00DCE560379A4B /* ImportVorschauView.swift */,
 			);
 			name = "Views";
 			path = "Views";
@@ -200,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				868DFA7FE34F4494A2747A4B /* ErinnerungsService.swift */,
+							8E2075920777CCF0DEDC6264 /* StammdatenImporter.swift */,
 			);
 			name = "Services";
 			path = "Services";
@@ -276,6 +282,8 @@
 				20D2BDC964C445088F0EBD5A /* EinstellungenView.swift in Sources */,
 				995F6CAAB2FE4FF0B99003BE /* ReinigungskraefteView.swift in Sources */,
 				5B95F5AA58B54A8AAB94CCB4 /* ErinnerungsService.swift in Sources */,
+							DA49D29E45D9025287996115 /* StammdatenImporter.swift in Sources */,
+							EC16950BC7720A98CCD3FE7C /* ImportVorschauView.swift in Sources */,
 			); runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -287,6 +295,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				SWIFT_VERSION = 5.0;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 			};
 			name = Debug;
 		};
@@ -305,6 +318,11 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				SWIFT_VERSION = 5.0;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				CODE_SIGN_ENTITLEMENTS = "Quellcode/Schlüsselverwaltung.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UUZ8K43EJ;

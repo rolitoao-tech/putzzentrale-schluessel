@@ -123,7 +123,7 @@ private struct BewegungZeile: View {
                     }
                     if let rk = vm.zugeteilteReinigungskraft(kundenId: bewegung.kundenId) {
                         Text("·").font(.caption2).foregroundColor(.secondary)
-                        Text("RK: \(rk.name)")
+                        Text("PF: \(rk.name)")
                             .font(.caption2).foregroundColor(.green.opacity(0.8))
                     }
                 }

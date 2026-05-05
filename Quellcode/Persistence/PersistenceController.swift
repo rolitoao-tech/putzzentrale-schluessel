@@ -69,15 +69,16 @@ final class PersistenceController {
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
 
-        // CloudKit-Schema einmalig pushen.
-        // Das Flag stellt sicher, dass dies pro Mac nur einmal ausgeführt wird –
-        // initializeCloudKitSchema ist teuer und nur fürs erstmalige Bootstrapping gedacht.
+        // CloudKit-Schema einmalig pushen. Der Versions-Key wird bei jeder
+        // Schema-Erweiterung hochgezählt, damit neue Felder nach Modell-Updates
+        // automatisch in CloudKit publiziert werden.
         #if DEBUG
-        if !inMemory && !UserDefaults.standard.bool(forKey: "cloudKitSchemaInitialisiert") {
+        let schemaKey = "cloudKitSchemaInitialisiert_v2"
+        if !inMemory && !UserDefaults.standard.bool(forKey: schemaKey) {
             do {
                 try container.initializeCloudKitSchema(options: [])
-                UserDefaults.standard.set(true, forKey: "cloudKitSchemaInitialisiert")
-                print("CloudKit-Schema erfolgreich initialisiert.")
+                UserDefaults.standard.set(true, forKey: schemaKey)
+                print("CloudKit-Schema erfolgreich initialisiert (v2).")
             } catch {
                 print("CloudKit-Schema-Initialisierung fehlgeschlagen: \(error)")
             }

@@ -69,22 +69,22 @@ struct BewegungErfassenView: View {
             Divider()
 
             Form {
-                Section("Kunde") {
+                Section("KD") {
                     if let b = bestehendesBewegung {
-                        LabeledContent("Kunde") {
+                        LabeledContent("KD") {
                             Text(vm.kundeName(id: b.kundenId)).foregroundColor(.secondary)
                         }
                     } else if let k = vorausgewaehlt {
-                        LabeledContent("Kunde") {
+                        LabeledContent("KD") {
                             Text("\(k.name) (Nr. \(k.kundennummer))").foregroundColor(.secondary)
                         }
                         if let rk = vm.zugeteilteReinigungskraft(kundenId: k.id) {
-                            LabeledContent("Zugeteilte RK") {
+                            LabeledContent("Zugeteilte PF") {
                                 Text(rk.name).foregroundColor(.secondary)
                             }
                         }
                     } else {
-                        Picker("Kunde", selection: $gewaehlterKunde) {
+                        Picker("KD", selection: $gewaehlterKunde) {
                             Text("Bitte auswählen").tag(Optional<Kunde>(nil))
                             ForEach(verfuegbareKunden) { k in
                                 Text("\(k.kundennummer) – \(k.name)").tag(Optional(k))
@@ -125,7 +125,7 @@ struct BewegungErfassenView: View {
                     case .dossier:
                         TextField("Kürzel / Bezeichnung", text: $dossierKuerzel)
                     case .stellvertretung:
-                        Picker("Reinigungskraft", selection: $gewaehlteStellvertretung) {
+                        Picker("PF", selection: $gewaehlteStellvertretung) {
                             Text("Bitte auswählen").tag(Optional<Reinigungskraft>(nil))
                             ForEach(vm.reinigungskraefte.filter(\.aktiv)) { r in
                                 Text(r.name).tag(Optional(r))
@@ -208,7 +208,7 @@ struct BewegungErfassenView: View {
 
             Form {
                 Section("Bewegung") {
-                    LabeledContent("Kunde") {
+                    LabeledContent("KD") {
                         Text(vm.kundeName(id: bewegung.kundenId)).foregroundColor(.secondary)
                     }
                     LabeledContent("War bei") {

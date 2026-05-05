@@ -70,4 +70,37 @@ class ErinnerungsService: ObservableObject {
         item.isCompleted = true
         try? store.save(item, commit: true)
     }
+
+    // TEMPORÄR (nur DEBUG): Cleanup von Schlüssel-Erinnerungen für die Testdaten-Phase.
+    // Mit dem Wartungs-Tab in EinstellungenView nach der Stammdaten-Migration entfernen.
+    #if DEBUG
+    // Löscht alle von dieser App erzeugten Schlüssel-Erinnerungen.
+    // Erkennung über den Titel-Präfix "Schlüssel zurück:" – gilt für alle
+    // Erinnerungs-Listen, unabhängig von der eingestellten Standard-Liste.
+    @discardableResult
+    func alleSchluesselErinnerungenLoeschen() async -> Int {
+        guard zugriffErteilt else { return 0 }
+        let kalender = store.calendars(for: .reminder)
+        let praedikat = store.predicateForReminders(in: kalender)
+
+        let reminders: [EKReminder] = await withCheckedContinuation { cont in
+            store.fetchReminders(matching: praedikat) { result in
+                cont.resume(returning: result ?? [])
+            }
+        }
+        var anzahl = 0
+        for r in reminders where (r.title ?? "").hasPrefix("Schlüssel zurück:") {
+            do {
+                try store.remove(r, commit: false)
+                anzahl += 1
+            } catch {
+                print("[Erinnerungen] Löschen fehlgeschlagen: \(error)")
+            }
+        }
+        do { try store.commit() } catch {
+            print("[Erinnerungen] Commit fehlgeschlagen: \(error)")
+        }
+        return anzahl
+    }
+    #endif
 }

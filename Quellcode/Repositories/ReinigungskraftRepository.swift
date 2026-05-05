@@ -47,6 +47,11 @@ final class ReinigungskraftRepository {
     private func applyFields(_ r: Reinigungskraft, on cd: CDReinigungskraft) {
         if cd.id == nil { cd.id = r.id }
         cd.name    = r.name
+        cd.strasse = r.strasse
+        cd.plz     = r.plz
+        cd.ort     = r.ort
+        cd.telefon = r.telefon
+        cd.mobil   = r.mobil
         cd.aktiv   = r.aktiv
         cd.notizen = r.notizen
     }
@@ -61,6 +66,11 @@ final class ReinigungskraftRepository {
         Reinigungskraft(
             id: cd.id ?? UUID(),
             name: cd.name ?? "",
+            strasse: cd.strasse ?? "",
+            plz: cd.plz ?? "",
+            ort: cd.ort ?? "",
+            telefon: cd.telefon ?? "",
+            mobil: cd.mobil ?? "",
             aktiv: cd.aktiv,
             notizen: cd.notizen ?? ""
         )

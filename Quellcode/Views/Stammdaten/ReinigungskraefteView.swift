@@ -2,8 +2,7 @@ import SwiftUI
 
 // Fokus-Hinweis für die Detail-Ansicht: zu welcher Sektion soll gescrollt werden?
 enum RKFokus: String, Hashable {
-    case beiIhr         = "bei-ihr"
-    case unterwegs      = "unterwegs"
+    case zugeteilte      = "zugeteilte"
     case stellvertretung = "stellvertretung"
 }
 
@@ -54,21 +53,12 @@ struct ReinigungskraefteView: View {
             }
             .background(Color(.controlBackgroundColor))
         }
-        .navigationTitle("Reinigungskräfte")
+        .navigationTitle("PF")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { zeigeNeueForm = true } label: {
-                    Label("Neue Reinigungskraft", systemImage: "plus")
+                    Label("Neue PF", systemImage: "plus")
                 }
-            }
-            // Temporär: Demo-Daten für Entwicklung. Wird vor Auslieferung entfernt.
-            ToolbarItem {
-                Button {
-                    vm.demoDatenErzeugen()
-                } label: {
-                    Label("Demo-Daten", systemImage: "wand.and.stars")
-                }
-                .help("Erzeugt 5 RKs + 20 Demo-Kunden mit gemischten Bewegungen")
             }
         }
         .sheet(isPresented: $zeigeNeueForm) {
@@ -123,7 +113,7 @@ struct ReinigungskraftZeile: View {
 
             Spacer(minLength: 4)
 
-            Button { onZahlenklick?(.beiIhr) } label: {
+            Button { onZahlenklick?(.zugeteilte) } label: {
                 Text("\(anzahlBeiIhr)")
                     .font(.callout)
                     .foregroundColor(anzahlBeiIhr > 0 ? .primary : .secondary)
@@ -132,7 +122,7 @@ struct ReinigungskraftZeile: View {
             .buttonStyle(.plain)
             .help("Eigene Schlüssel die aktuell bei \(rk.name) sind")
 
-            Button { onZahlenklick?(.unterwegs) } label: {
+            Button { onZahlenklick?(.zugeteilte) } label: {
                 Text("\(anzahlUnterwegs)")
                     .font(.callout)
                     .foregroundColor(anzahlUnterwegs > 0 ? .orange : .secondary)
@@ -191,8 +181,7 @@ struct ReinigungskraftDetail: View {
                     kopfbereich
 
                     stellvertretungsSektion.id(RKFokus.stellvertretung.rawValue)
-                    kundenUnterwegsSektion.id(RKFokus.unterwegs.rawValue)
-                    kundenBeiIhrSektion.id(RKFokus.beiIhr.rawValue)
+                    zugeteilteKundenSektion.id(RKFokus.zugeteilte.rawValue)
                 }
                 .padding(20)
             }
@@ -220,13 +209,13 @@ struct ReinigungskraftDetail: View {
             Text("\(stellvertretungenOffen.count) offene Stellvertretung(en) werden als zurückgegeben markiert.")
         }
         .confirmationDialog(
-            "Reinigungskraft «\(rk.name)» löschen?",
+            "PF «\(rk.name)» löschen?",
             isPresented: $zeigeLoeschen,
             titleVisibility: .visible
         ) {
             Button("Löschen", role: .destructive) { vm.rkLoeschen(id: rk.id) }
         } message: {
-            Text("Zugeteilte Kunden verlieren die Zuteilung. Bewegungen bleiben erhalten.")
+            Text("Zugeteilte KD verlieren die Zuteilung. Bewegungen bleiben erhalten.")
         }
         .sheet(isPresented: $zeigeBearbeiten) {
             ReinigungskraftFormular(vorlage: rk) { r in
@@ -260,7 +249,7 @@ struct ReinigungskraftDetail: View {
                     }
                 }
                 HStack(spacing: 12) {
-                    Label("\(zugeteilteKunden.count) zugeteilte Kunden", systemImage: "key.fill")
+                    Label("\(zugeteilteKunden.count) zugeteilte KD", systemImage: "key.fill")
                         .font(.caption).foregroundColor(.secondary)
                     if !stellvertretungenOffen.isEmpty {
                         Label("\(stellvertretungenOffen.count) Stellvertretung(en)", systemImage: "person.2.fill")
@@ -332,41 +321,37 @@ struct ReinigungskraftDetail: View {
         }
     }
 
-    // Schlüssel die GERADE bei der RK sind (Normalzustand, keine offene Bewegung)
-    private var kundenBeiIhrSektion: some View {
+    // Alle zugeteilten KD in einer Liste – mit Status-Indikator (bei mir / unterwegs / überfällig)
+    // und Kontaktdaten für direkten Zugriff bei Rückrufen.
+    private var zugeteilteKundenSektion: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Schlüssel bei \(rk.name) (\(kundenBeiIhr.count))")
-                .font(.headline).foregroundColor(.green.opacity(0.9))
+            Text("Zugeteilte KD (\(zugeteilteKunden.count))")
+                .font(.headline)
                 .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(hervorgehoben == .beiIhr ? Color.green.opacity(0.25) : Color.clear)
+                .background(hervorgehoben == .zugeteilte ? Color.accentColor.opacity(0.25) : Color.clear)
                 .clipShape(RoundedRectangle(cornerRadius: 4))
-            if kundenBeiIhr.isEmpty {
-                Text("Keine Schlüssel aktuell bei \(rk.name).")
+
+            if zugeteilteKunden.isEmpty {
+                Text("Keine KD zugeteilt.")
                     .font(.caption).foregroundColor(.secondary)
             } else {
                 VStack(spacing: 1) {
                     HStack {
-                        Text("Nr.").frame(width: 60, alignment: .leading)
-                        Text("Name").frame(minWidth: 150, alignment: .leading)
-                        Text("Wohnort").frame(minWidth: 100, alignment: .leading)
+                        Spacer().frame(width: 14)
+                        Text("Nr.").frame(width: 50, alignment: .leading)
+                        Text("Name").frame(minWidth: 140, alignment: .leading)
+                        Text("Wohnort").frame(minWidth: 90, alignment: .leading)
+                        Text("Status").frame(minWidth: 130, alignment: .leading)
                         Spacer()
+                        Text("Telefon").frame(width: 110, alignment: .leading)
+                        Text("Erwartet").frame(width: 80, alignment: .trailing)
                     }
                     .font(.caption).foregroundColor(.secondary)
                     .padding(.horizontal, 12).padding(.vertical, 5)
                     .background(Color.secondary.opacity(0.08))
 
-                    ForEach(kundenBeiIhr) { k in
-                        HStack {
-                            Circle().fill(Color.green).frame(width: 7, height: 7)
-                            Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
-                                .frame(width: 50, alignment: .leading)
-                            Text(k.name).frame(minWidth: 150, alignment: .leading)
-                            Text(k.wohnort).font(.caption).foregroundColor(.secondary)
-                                .frame(minWidth: 100, alignment: .leading)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 12).padding(.vertical, 7)
-                        .background(Color(.controlBackgroundColor))
+                    ForEach(zugeteilteKunden) { k in
+                        zugeteilteKundeZeile(k)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -374,67 +359,55 @@ struct ReinigungskraftDetail: View {
         }
     }
 
-    // Schlüssel die aktuell unterwegs sind (Büro/Stellvertretung/in Bewegung)
-    private var kundenUnterwegsSektion: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Schlüssel unterwegs (\(kundenUnterwegs.count))")
-                .font(.headline).foregroundColor(kundenUnterwegs.isEmpty ? .secondary : .orange)
-                .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(hervorgehoben == .unterwegs ? Color.orange.opacity(0.25) : Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-            if kundenUnterwegs.isEmpty {
-                Text("Alle Schlüssel sind bei \(rk.name).")
-                    .font(.caption).foregroundColor(.secondary)
-            } else {
-                VStack(spacing: 1) {
-                    HStack {
-                        Text("Nr.").frame(width: 60, alignment: .leading)
-                        Text("Name").frame(minWidth: 130, alignment: .leading)
-                        Text("Aktueller Standort").frame(minWidth: 130, alignment: .leading)
-                        Spacer()
-                        Text("Erwartet").frame(width: 90, alignment: .trailing)
-                        Text("Status").frame(width: 24, alignment: .trailing)
-                    }
-                    .font(.caption).foregroundColor(.secondary)
-                    .padding(.horizontal, 12).padding(.vertical, 5)
-                    .background(Color.secondary.opacity(0.08))
+    @ViewBuilder
+    private func zugeteilteKundeZeile(_ k: Kunde) -> some View {
+        let bewegung = vm.aktiveBewegung(kundenId: k.id)
+        let statusFarbe: Color = bewegung?.status.farbe ?? .green
+        let statusText: String = {
+            guard let b = bewegung else { return "bei mir" }
+            if let stellvId = b.stellvertretungRKId {
+                return "bei \(vm.rkName(id: stellvId))"
+            }
+            return b.aufenthaltsText
+        }()
+        let statusFarbeText: Color = {
+            if bewegung?.status == .ueberfaellig { return .red }
+            if bewegung != nil { return .orange }
+            return .green.opacity(0.9)
+        }()
+        // Mobil bevorzugen, sonst Festnetz, sonst Strich
+        let telefonText: String = {
+            if !k.mobil.isEmpty { return k.mobil }
+            if !k.telefon.isEmpty { return k.telefon }
+            return "–"
+        }()
 
-                    ForEach(kundenUnterwegs) { k in
-                        if let b = vm.aktiveBewegung(kundenId: k.id) {
-                            HStack {
-                                Circle().fill(b.status.farbe).frame(width: 7, height: 7)
-                                Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
-                                    .frame(width: 50, alignment: .leading)
-                                Text(k.name).frame(minWidth: 130, alignment: .leading)
-                                let ort = b.stellvertretungRKId != nil
-                                    ? "Bei \(vm.rkName(id: b.stellvertretungRKId!))"
-                                    : b.aufenthaltsText
-                                Text(ort)
-                                    .font(.caption)
-                                    .foregroundColor(b.stellvertretungRKId != nil ? .orange : .secondary)
-                                    .frame(minWidth: 130, alignment: .leading)
-                                Spacer()
-                                if let er = b.erwarteteRueckgabe {
-                                    Text(er.anzeigeText)
-                                        .font(.caption)
-                                        .foregroundColor(b.status == .ueberfaellig ? .red : .secondary)
-                                        .frame(width: 90, alignment: .trailing)
-                                } else {
-                                    Text("–").font(.caption).foregroundColor(.secondary)
-                                        .frame(width: 90, alignment: .trailing)
-                                }
-                                Image(systemName: b.status.icon)
-                                    .foregroundColor(b.status.farbe).font(.caption)
-                                    .frame(width: 24, alignment: .trailing)
-                            }
-                            .padding(.horizontal, 12).padding(.vertical, 7)
-                            .background(Color(.controlBackgroundColor))
-                        }
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+        HStack {
+            Circle().fill(statusFarbe).frame(width: 7, height: 7).frame(width: 14)
+            Text(k.kundennummer).font(.caption).foregroundColor(.secondary)
+                .frame(width: 50, alignment: .leading)
+            Text(k.name).frame(minWidth: 140, alignment: .leading)
+            Text(k.wohnort).font(.caption).foregroundColor(.secondary)
+                .frame(minWidth: 90, alignment: .leading)
+            Text(statusText)
+                .font(.caption).foregroundColor(statusFarbeText)
+                .frame(minWidth: 130, alignment: .leading)
+            Spacer()
+            Text(telefonText).font(.caption).foregroundColor(.secondary)
+                .frame(width: 110, alignment: .leading)
+                .textSelection(.enabled)
+            if let er = bewegung?.erwarteteRueckgabe {
+                Text(er.anzeigeText)
+                    .font(.caption)
+                    .foregroundColor(bewegung?.status == .ueberfaellig ? .red : .secondary)
+                    .frame(width: 80, alignment: .trailing)
+            } else {
+                Text("–").font(.caption).foregroundColor(.secondary)
+                    .frame(width: 80, alignment: .trailing)
             }
         }
+        .padding(.horizontal, 12).padding(.vertical, 7)
+        .background(Color(.controlBackgroundColor))
     }
 }
 
@@ -447,13 +420,18 @@ struct ReinigungskraftFormular: View {
     let onSpeichern: (Reinigungskraft) -> Void
 
     @State private var name = ""
+    @State private var strasse = ""
+    @State private var plz = ""
+    @State private var ort = ""
+    @State private var telefon = ""
+    @State private var mobil = ""
     @State private var aktiv = true
     @State private var notizen = ""
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(vorlage == nil ? "Neue Reinigungskraft" : "Reinigungskraft bearbeiten")
+                Text(vorlage == nil ? "Neue PF" : "PF bearbeiten")
                     .font(.title3).fontWeight(.semibold)
                 Spacer()
                 Button("Abbrechen") { dismiss() }.keyboardShortcut(.escape)
@@ -463,8 +441,19 @@ struct ReinigungskraftFormular: View {
             Divider()
 
             Form {
-                Section("Name") {
+                Section("Stammdaten") {
                     TextField("Name", text: $name)
+                }
+                Section("Adresse") {
+                    TextField("Strasse", text: $strasse)
+                    HStack {
+                        TextField("PLZ", text: $plz).frame(maxWidth: 80)
+                        TextField("Ort", text: $ort)
+                    }
+                }
+                Section("Kontakt") {
+                    TextField("Telefon", text: $telefon)
+                    TextField("Mobil", text: $mobil)
                 }
                 Section {
                     Toggle("Aktiv", isOn: $aktiv)
@@ -481,8 +470,13 @@ struct ReinigungskraftFormular: View {
                 Spacer()
                 Button("Speichern") {
                     var r = vorlage ?? Reinigungskraft()
-                    r.name = name.trimmingCharacters(in: .whitespaces)
-                    r.aktiv = aktiv
+                    r.name    = name.trimmingCharacters(in: .whitespaces)
+                    r.strasse = strasse.trimmingCharacters(in: .whitespaces)
+                    r.plz     = plz.trimmingCharacters(in: .whitespaces)
+                    r.ort     = ort.trimmingCharacters(in: .whitespaces)
+                    r.telefon = telefon.trimmingCharacters(in: .whitespaces)
+                    r.mobil   = mobil.trimmingCharacters(in: .whitespaces)
+                    r.aktiv   = aktiv
                     r.notizen = notizen
                     onSpeichern(r)
                 }
@@ -492,10 +486,17 @@ struct ReinigungskraftFormular: View {
             }
             .padding()
         }
-        .frame(minWidth: 320, minHeight: 280)
+        .frame(minWidth: 380, minHeight: 480)
         .onAppear {
             if let r = vorlage {
-                name = r.name; aktiv = r.aktiv; notizen = r.notizen
+                name    = r.name
+                strasse = r.strasse
+                plz     = r.plz
+                ort     = r.ort
+                telefon = r.telefon
+                mobil   = r.mobil
+                aktiv   = r.aktiv
+                notizen = r.notizen
             }
         }
     }

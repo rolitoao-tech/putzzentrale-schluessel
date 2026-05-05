@@ -42,10 +42,11 @@ struct DashboardView: View {
 
     private var kennzahlenLeiste: some View {
         HStack(spacing: 16) {
-            KennzahlKarte(titel: "Kunden gesamt",    wert: "\(vm.kunden.filter(\.aktiv).count)", symbol: "person.fill",                 farbe: .blue)
-            KennzahlKarte(titel: "Im Umlauf",        wert: "\(vm.schluesselImUmlauf)",            symbol: "arrow.left.arrow.right",       farbe: .orange)
-            KennzahlKarte(titel: "Offene Pendenzen", wert: "\(vm.offeneBewegungen.count)",         symbol: "clock",                        farbe: .purple)
-            KennzahlKarte(titel: "Überfällig",       wert: "\(vm.ueberfaelligeBewegungen.count)",  symbol: "exclamationmark.triangle.fill", farbe: vm.ueberfaelligeBewegungen.isEmpty ? .secondary : .red)
+            KennzahlKarte(titel: "KD gesamt",        wert: "\(vm.kunden.filter(\.aktiv).count)",            symbol: "person.fill",                   farbe: .blue)
+            KennzahlKarte(titel: "PF gesamt",        wert: "\(vm.reinigungskraefte.filter(\.aktiv).count)", symbol: "person.2.fill",                 farbe: .teal)
+            KennzahlKarte(titel: "Im Umlauf",        wert: "\(vm.schluesselImUmlauf)",                      symbol: "arrow.left.arrow.right",        farbe: .orange)
+            KennzahlKarte(titel: "Offene Pendenzen", wert: "\(vm.offeneBewegungen.count)",                  symbol: "clock",                         farbe: .purple)
+            KennzahlKarte(titel: "Überfällig",       wert: "\(vm.ueberfaelligeBewegungen.count)",           symbol: "exclamationmark.triangle.fill", farbe: vm.ueberfaelligeBewegungen.isEmpty ? .secondary : .red)
         }
     }
 
@@ -62,7 +63,7 @@ struct DashboardView: View {
                 VStack(spacing: 1) {
                     // Kopfzeile
                     HStack {
-                        Text("Kunde / Zuget. RK").frame(minWidth: 160, alignment: .leading)
+                        Text("KD / Zuget. PF").frame(minWidth: 160, alignment: .leading)
                         Text("Aktuell bei").frame(minWidth: 140, alignment: .leading)
                         Text("Grund").frame(minWidth: 100, alignment: .leading)
                         Text("Eingefordert").frame(width: 90, alignment: .leading)
@@ -129,7 +130,7 @@ struct DashboardZeile: View {
                     Text("Nr. \(k.kundennummer)").font(.caption2).foregroundColor(.secondary)
                 }
                 if let rk = vm.zugeteilteReinigungskraft(kundenId: bewegung.kundenId) {
-                    Text("RK: \(rk.name)").font(.caption2).foregroundColor(.green.opacity(0.8))
+                    Text("PF: \(rk.name)").font(.caption2).foregroundColor(.green.opacity(0.8))
                 }
             }
             .frame(minWidth: 160, alignment: .leading)

@@ -61,7 +61,14 @@ final class KundenRepository {
             id: cd.id ?? UUID(),
             kundennummer: cd.kundennummer ?? "",
             name: cd.name ?? "",
+            firma: cd.firma ?? "",
+            strasse: cd.strasse ?? "",
+            plz: cd.plz ?? "",
             wohnort: cd.wohnort ?? "",
+            telefon: cd.telefon ?? "",
+            mobil: cd.mobil ?? "",
+            email: cd.email ?? "",
+            auftragsnummer: cd.auftragsnummer ?? "",
             zugeteilteReinigungskraftId: cd.zugeteilteReinigungskraft?.id,
             aktiv: cd.aktiv,
             notizen: cd.notizen ?? ""
@@ -70,11 +77,18 @@ final class KundenRepository {
 
     fileprivate static func applyFields(_ k: Kunde, on cd: CDKunde, ctx: NSManagedObjectContext) {
         if cd.id == nil { cd.id = k.id }
-        cd.kundennummer = k.kundennummer
-        cd.name         = k.name
-        cd.wohnort      = k.wohnort
-        cd.aktiv        = k.aktiv
-        cd.notizen      = k.notizen
+        cd.kundennummer   = k.kundennummer
+        cd.name           = k.name
+        cd.firma          = k.firma
+        cd.strasse        = k.strasse
+        cd.plz            = k.plz
+        cd.wohnort        = k.wohnort
+        cd.telefon        = k.telefon
+        cd.mobil          = k.mobil
+        cd.email          = k.email
+        cd.auftragsnummer = k.auftragsnummer
+        cd.aktiv          = k.aktiv
+        cd.notizen        = k.notizen
 
         if let rkId = k.zugeteilteReinigungskraftId {
             cd.zugeteilteReinigungskraft = Self.findRK(id: rkId, ctx: ctx)
